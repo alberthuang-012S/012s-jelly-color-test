@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { progressPercent } from '../test/scheduler'
+import { progressPercent, questionCountEstimate } from '../test/scheduler'
 import { PlateCanvas } from './PlateCanvas'
 import { NumberPad } from './NumberPad'
 import type { GeneratedPlate, TestEngineState, TrialSpec } from '../test/types'
@@ -21,6 +21,8 @@ const phaseLabels: Record<TrialSpec['phase'], string> = {
 export function TestScreen({ engine, spec, plate, onAnswer }: TestScreenProps) {
   const [locked, setLocked] = useState(false)
   const progress = progressPercent(engine)
+  const count = questionCountEstimate(engine)
+  const totalLabel = count.exact ? `${count.maximumTotal} 題` : `${count.minimumTotal}–${count.maximumTotal} 題`
   useEffect(() => setLocked(false), [spec.id])
   const answer = (value: number | null) => {
     if (locked) return
@@ -32,7 +34,7 @@ export function TestScreen({ engine, spec, plate, onAnswer }: TestScreenProps) {
       <div className="test-topbar">
         <div className="brand-lockup"><span className="brand-dot" /> JELLY COLOR TEST</div>
         <div className="test-stage"><span className="stage-dot" /> {phaseLabels[spec.phase]}</div>
-        <div className="test-progress-label">測驗進行中</div>
+        <div className="test-progress-label" aria-live="polite"><span className="test-progress-phase">測驗進行中 · </span>已作答 {count.answered} 題 <span className="test-progress-total">/ 預估總題數 {totalLabel}</span></div>
       </div>
       <div className="progress-track" aria-label={`測驗進度 ${progress}%`}><span style={{ width: `${Math.max(4, progress)}%` }} /></div>
       <section className="test-content">

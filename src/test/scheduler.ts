@@ -13,6 +13,13 @@ import type {
 
 const NUMBERS = Array.from({ length: 100 }, (_, number) => number)
 
+export interface QuestionCountEstimate {
+  answered: number
+  minimumTotal: number
+  maximumTotal: number
+  exact: boolean
+}
+
 function snapshot(state: TestEngineState['tracks'][ColorDirectionId]): StaircaseSnapshot {
   return {
     currentDistance: state.currentDistance,
@@ -266,4 +273,38 @@ export function progressPercent(state: TestEngineState): number {
   const calibrationProgress = (state.calibrationCursor / DIRECTION_ORDER.length) * 0.12
   const anchorProgress = ((state.anchorSlots.length - state.anchorSlots.filter((slot) => !slot.answered).length) / state.anchorSlots.length) * 0.1
   return Math.min(100, Math.round((controlProgress + calibrationProgress + trackProgress * 0.66 + anchorProgress) * 100))
+}
+
+/**
+ * The adaptive section has a real range rather than a fixed question count.
+ * Before calibration is known, show the pass-calibration range; once all
+ * directions are calibrated, calculate the remaining lower/upper bound from
+ * each track and the still-unanswered anchors.
+ */
+export function questionCountEstimate(state: TestEngineState): QuestionCountEstimate {
+  const answered = state.questions.length
+  if (state.status === 'complete') return { answered, minimumTotal: answered, maximumTotal: answered, exact: true }
+  if (state.phase === 'control' || state.phase === 'calibration') {
+    return { answered, minimumTotal: 41, maximumTotal: 71, exact: false }
+  }
+
+  let minimumRemaining = 0
+  let maximumRemaining = 0
+  DIRECTION_ORDER.forEach((directionId) => {
+    if (state.calibrationFailed[directionId]) return
+    const track = state.tracks[directionId]
+    if (!track.stopped) {
+      minimumRemaining += Math.max(0, adaptiveConfig.minimumTrials - track.trialCount)
+      maximumRemaining += Math.max(0, adaptiveConfig.maximumTrials - track.trialCount)
+    }
+    const unansweredAnchors = state.anchorSlots.filter((slot) => slot.directionId === directionId && !slot.answered).length
+    minimumRemaining += unansweredAnchors
+    maximumRemaining += unansweredAnchors
+  })
+  return {
+    answered,
+    minimumTotal: answered + minimumRemaining,
+    maximumTotal: answered + maximumRemaining,
+    exact: minimumRemaining === maximumRemaining,
+  }
 }

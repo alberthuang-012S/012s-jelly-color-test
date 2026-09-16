@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { generatePlate } from '../plate/generator'
 import { generatePalette } from '../plate/palettes'
 import { validatePlate, dotNominalDistance } from '../plate/validator'
-import { createEngineState, recordTrial, selectNextTrial, progressPercent } from '../test/scheduler'
+import { createEngineState, recordTrial, selectNextTrial, progressPercent, questionCountEstimate } from '../test/scheduler'
 import { createStaircase, updateStaircase } from '../psychophysics/staircase'
 import { estimateThreshold, overallThreshold } from '../psychophysics/threshold'
 import { calculateAllMetrics } from '../psychophysics/metrics'
@@ -32,6 +32,7 @@ describe('measurement engine invariants', () => {
   })
   it('does not truncate at 35 adaptive trials', () => {
     let state = createEngineState(123)
+    expect(questionCountEstimate(state)).toMatchObject({ answered: 0, minimumTotal: 41, maximumTotal: 71, exact: false })
     for (let guard = 0; guard < 80 && state.status === 'in-progress'; guard++) {
       const { spec, plate } = next(state)
       state = recordTrial(state, spec, spec.targetNumber, 800, false, plate)
@@ -42,6 +43,19 @@ describe('measurement engine invariants', () => {
     expect(Object.values(state.tracks).every((track) => track.stopped && !track.converged)).toBe(true)
     expect(progressPercent(state)).toBe(100)
     expect(calculateAllMetrics(state).overallDcdt).toBeUndefined()
+  })
+  it('updates the visible count range after calibration and converged tracks', () => {
+    let state = createEngineState(123)
+    for (let guard = 0; guard < 20 && state.phase !== 'adaptive'; guard++) {
+      const { spec, plate } = next(state)
+      state = recordTrial(state, spec, spec.targetNumber, 800, false, plate)
+    }
+    expect(state.phase).toBe('adaptive')
+    const afterCalibration = questionCountEstimate(state)
+    expect(afterCalibration.answered).toBe(state.questions.length)
+    expect(afterCalibration.minimumTotal).toBeGreaterThanOrEqual(afterCalibration.answered)
+    expect(afterCalibration.maximumTotal).toBeGreaterThanOrEqual(afterCalibration.minimumTotal)
+    expect(afterCalibration.maximumTotal).toBeLessThanOrEqual(71)
   })
   it('calibration failure cannot produce anchors or thresholds', () => {
     let state = createEngineState(123)
