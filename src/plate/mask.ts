@@ -2,6 +2,9 @@ import { seededRandom } from './rng'
 import type { PlateDot } from '../test/types'
 
 const GLYPHS: Record<string, string[]> = {
+  '0': ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  '3': ['11110', '00011', '00011', '01110', '00011', '00011', '11110'],
+  '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
   '6': ['01110', '11000', '11000', '11110', '11011', '11011', '01110'],
   '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
   '2': ['01110', '11011', '00011', '00110', '01100', '11000', '11111'],
@@ -12,9 +15,10 @@ const GLYPHS: Record<string, string[]> = {
 }
 
 function glyphForNumber(number: number): string[] {
+  if (!Number.isInteger(number) || number < 0 || number > 99) throw new Error('Unsupported target number')
   return String(number)
     .split('')
-    .map((digit) => GLYPHS[digit] ?? GLYPHS['6'])
+    .map((digit) => GLYPHS[digit])
     .reduce<string[]>((rows, glyph, index, glyphs) => {
       if (!rows.length) return [...glyph]
       return rows.map((row, rowIndex) => `${row}0${glyph[rowIndex]}`)

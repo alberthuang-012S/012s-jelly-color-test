@@ -7,8 +7,8 @@ describe('plate generator stress', () => {
     for (let index = 0; index < 3000; index += 1) {
       const plate = generatePlate({
         direction: (['A', 'B', 'C'] as const)[index % 3],
-        requestedDistance: 0.0035 + (Math.floor(index / 15) % 20) * (0.075 - 0.0035) / 19,
-        number: [6, 12, 29, 45, 74][Math.floor(index / 3) % 5],
+        requestedDistance: 0.0035 + (Math.floor(index / 300) % 10) * (0.075 - 0.0035) / 9,
+        number: Math.floor(index / 3) % 100,
         seed: 1000 + index,
         phase: 'adaptive',
       })

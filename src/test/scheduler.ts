@@ -1,6 +1,7 @@
 import { adaptiveConfig, DIRECTION_ORDER } from '../psychophysics/config'
 import { createStaircase, updateStaircase } from '../psychophysics/staircase'
 import { timingFlagFor } from '../psychophysics/quality'
+import { seededRandom } from '../plate/rng'
 import type {
   ColorDirectionId,
   GeneratedPlate,
@@ -10,7 +11,7 @@ import type {
   TrialSpec,
 } from './types'
 
-const NUMBERS = [6, 12, 29, 45, 74]
+const NUMBERS = Array.from({ length: 100 }, (_, number) => number)
 
 function snapshot(state: TestEngineState['tracks'][ColorDirectionId]): StaircaseSnapshot {
   return {
@@ -58,13 +59,9 @@ export function createEngineState(seed = Math.floor(Math.random() * 0x100000000)
   }
 }
 
-function numberFor(seed: number): number {
-  return NUMBERS[Math.abs(seed) % NUMBERS.length]
-}
-
-function anchorNumber(directionId: ColorDirectionId, index: number): number {
-  const directionIndex = DIRECTION_ORDER.indexOf(directionId)
-  return NUMBERS[(directionIndex * 2 + index) % NUMBERS.length]
+function numberFor(state: TestEngineState): number {
+  const random = seededRandom(seedFor(state) ^ 0x51ed270b)
+  return NUMBERS[Math.floor(random() * NUMBERS.length)]
 }
 
 function seedFor(state: TestEngineState, offset = 0): number {
@@ -96,7 +93,7 @@ export function selectNextTrial(state: TestEngineState): TrialSpec | null {
       id: `control-${state.controlIndex}`,
       phase: 'control',
       requestedDistance: 0.06,
-      targetNumber: numberFor(seedFor(state, state.controlIndex)),
+      targetNumber: numberFor(state),
       seed: seedFor(state, state.controlIndex),
     }
   }
@@ -107,7 +104,7 @@ export function selectNextTrial(state: TestEngineState): TrialSpec | null {
       phase: 'calibration',
       directionId,
       requestedDistance: state.calibrationDistances[directionId],
-      targetNumber: numberFor(seedFor(state)),
+      targetNumber: numberFor(state),
       seed: seedFor(state),
     }
   }
@@ -119,7 +116,7 @@ export function selectNextTrial(state: TestEngineState): TrialSpec | null {
       phase: 'anchor',
       directionId,
       requestedDistance: state.anchorLevels[directionId] ?? state.tracks[directionId].currentDistance,
-      targetNumber: anchorNumber(directionId, anchor.index),
+      targetNumber: numberFor(state),
       seed: seedFor(state, anchor.index + 11),
       anchorKey: `anchor-${directionId}`,
       anchorIndex: anchor.index,
@@ -133,7 +130,7 @@ export function selectNextTrial(state: TestEngineState): TrialSpec | null {
       phase: 'adaptive',
       directionId,
       requestedDistance: track.currentDistance,
-      targetNumber: numberFor(seedFor(state, track.trialCount)),
+      targetNumber: numberFor(state),
       seed: seedFor(state, track.trialCount),
     }
   }
@@ -145,7 +142,7 @@ export function selectNextTrial(state: TestEngineState): TrialSpec | null {
       phase: 'anchor',
       directionId,
       requestedDistance: state.anchorLevels[directionId] ?? state.tracks[directionId].currentDistance,
-      targetNumber: anchorNumber(directionId, remainingAnchor.index),
+      targetNumber: numberFor(state),
       seed: seedFor(state, remainingAnchor.index + 11),
       anchorKey: `anchor-${directionId}`,
       anchorIndex: remainingAnchor.index,

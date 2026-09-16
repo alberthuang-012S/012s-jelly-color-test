@@ -193,6 +193,14 @@ h1 em, .result-hero em { font-style: normal; color: #d95a4a; }
 .quality-warning { background: rgba(255,128,111,.17); border-left: 3px solid var(--coral); }
 .quality-warning > span { color: #c24d3d; font-weight: 900; }
 .reason-list { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 13px; color: var(--muted); font-size: 10px; }
+.report-summary { margin-top: 22px; padding: 22px; border-left: 3px solid var(--coral); background: rgba(255,128,111,.07); }
+.report-explanation h3 { margin: 0 0 12px; font-size: 15px; line-height: 1.6; }
+.report-explanation p, .report-explanation dd { margin: 0 0 12px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+.report-explanation .report-meta { font-size: 11px; overflow-wrap: anywhere; }
+.report-reading-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; margin-top: 28px; }
+.report-reading-grid article { padding-top: 20px; border-top: 1px solid var(--line); }
+.report-explanation dl { margin: 0; }
+.report-explanation dt { font-size: 13px; font-weight: 750; margin-bottom: 5px; }
 .advanced-section { margin-top: 54px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .advanced-toggle { width: 100%; display: flex; align-items: center; gap: 10px; padding: 18px 0; border: 0; background: transparent; text-align: left; cursor: pointer; font-size: 12px; font-weight: 800; }
 .advanced-toggle > span { display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--line); border-radius: 50%; font-size: 16px; font-weight: 400; }
@@ -257,6 +265,7 @@ h1 em, .result-hero em { font-style: normal; color: #d95a4a; }
   .quality-row { padding: 14px; }
   .quality-row strong { margin-top: 12px; font-size: 19px; }
   .advanced-panel { grid-template-columns: 1fr; }
+  .report-reading-grid { grid-template-columns: 1fr; gap: 16px; }
   .result-actions { flex-direction: column; align-items: stretch; }
   .result-actions .button { text-align: center; }
   .history-compare small { flex-basis: 100%; margin-left: 0; }

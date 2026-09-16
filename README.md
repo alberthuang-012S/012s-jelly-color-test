@@ -29,7 +29,9 @@ The audit includes a 3,000-plate production validation stress test and 500-sessi
 - Response time and focus interruptions are retained for timing flags and RQI; they do not directly reduce color ability metrics.
 - History is local-only and limited to 20 sessions. RQI < 60 remains visible but is excluded from usable trend data.
 
-### Engine revision: `uv2-open-response`
+### Engine revision: `uv3-open-response-100-targets`
+
+- Answers are sampled uniformly from 0–99 with replacement on every trial (including controls and anchors). Repeated answers are allowed. All ten digit masks are explicit; unsupported targets throw rather than silently rendering another digit. Session seeds reproduce the answer sequence. Changing the target set changes stimulus composition, so this revision is not directly compared with older results.
 
 - Each direction runs for at least 10 and at most 18 adaptive trials; 7 reversals indicate convergence. Hitting 18 trials stops a track with low convergence quality, not a claim of convergence. The former 35-trial session cap is removed. A fully calibrated session uses 41–71 total trials.
 - Palettes are generated symmetrically around neutral in nominal u′v′ at equal nominal luminance. A/B are opposite polarities, not independent clinical axes. Luminance noise is applied in linear RGB, then quantized to the actual canvas byte colors. Recorded distance is the separation of mean dot chromaticities. Out-of-gamut requests and failed plate checks fail closed.
@@ -37,7 +39,7 @@ The audit includes a 3,000-plate production validation stress test and 500-sessi
 - The reversal median is a separate approximate staircase summary, **not a validated 75% psychometric threshold**. Method labels are retained. No confidence interval or clinical equivalence is claimed.
 - CI monotonicity and fit are evaluated within directions. Fit quality is a descriptive, sampling-noise-adjusted binned calibration score, not a statistical goodness-of-fit test. Missing fit evidence scores zero. RQI completion uses calibration, trial coverage, reversals, threshold availability, and anchors rather than the completed flag alone.
 - Fresh sessions use different recorded seeds; explicit seeds reproduce simulations. Results record the engine version. The previous-session comparison excludes older versions and low-quality sessions.
-- The audit covers the full 3 directions × 5 target numbers × 20 distances (including limits), with 10 seeds per combination. Its open-response observer has no assumed 50% guessing floor, uses slope 4 on log-distance, and has 75% correct at the configured threshold. Three 500-session groups must each have ≥90% usable estimates, absolute median bias ≤25% of threshold, MAE ≤35%, and ≤71 trials. These are engineering regression gates, not clinical acceptance criteria. Real observers, lapse/guess behavior, display calibration, and repeatability still require empirical validation.
+- The audit now covers the full 3 directions × 100 target numbers × 10 distances (including limits). Its open-response observer has no assumed 50% guessing floor, uses slope 4 on log-distance, and has 75% correct at the configured threshold. Three 500-session groups must each have ≥90% usable estimates, absolute median bias ≤25% of threshold, MAE ≤35%, and ≤71 trials. These are engineering regression gates, not clinical acceptance criteria. Real observers, lapse/guess behavior, display calibration, and repeatability still require empirical validation. The prior audit report applies only to uv2; the expanded target set needs its own audit run.
 
 ## GitHub Pages
 

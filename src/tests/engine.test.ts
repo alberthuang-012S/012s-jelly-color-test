@@ -38,6 +38,7 @@ describe('measurement engine invariants', () => {
     }
     expect(state.status).toBe('complete')
     expect(state.adaptiveTrialCount).toBe(54)
+    expect(state.questions.some((item) => ![6, 12, 29, 45, 74].includes(item.targetNumber))).toBe(true)
     expect(Object.values(state.tracks).every((track) => track.stopped && !track.converged)).toBe(true)
     expect(progressPercent(state)).toBe(100)
     expect(calculateAllMetrics(state).overallDcdt).toBeUndefined()

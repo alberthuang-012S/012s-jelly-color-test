@@ -17,7 +17,7 @@ export function QualityPanel({ session }: QualityPanelProps) {
         <div className="quality-row"><span>Result Quality</span><strong>{session.resultQualityIndex} / 100</strong><small>{quality.classification}</small></div>
         <div className="quality-row"><span>Interruptions</span><strong>{quality.interruptions}</strong><small>{quality.extremeFastCount + quality.extremeSlowCount} timing flags</small></div>
       </div>
-      {quality.score < 60 ? <div className="quality-warning"><strong>本次結果可信度較低</strong><span>{quality.reasons[0] ?? '可重新挑戰一次，取得更完整的資料。'}</span></div> : <div className="quality-positive"><span>✦</span><div><strong>Result quality · {quality.classification}</strong><span>這次測驗的條件足以支持一個有脈絡的相對結果。</span></div></div>}
+      {quality.score < 60 ? <div className="quality-warning"><strong>本次結果可信度較低</strong><span>{quality.reasons[0] ?? '可重新挑戰一次，取得更完整的資料。'}</span></div> : <div className="quality-positive"><span>✦</span><div><strong>Result quality · {quality.classification}</strong><span>{session.overallDcdt === undefined ? '資料品質分數不代表門檻可估計；本次整體門檻仍為資料不足。' : '請連同估計方法、收斂狀態與測量限制一起閱讀；品質分數不等於準確率。'}</span></div></div>}
       {quality.reasons.length > 0 && <div className="reason-list">{quality.reasons.map((reason) => <span key={reason}>· {reason}</span>)}</div>}
     </section>
   )

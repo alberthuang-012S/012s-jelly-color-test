@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { DirectionProfile } from './DirectionProfile'
 import { DifficultyCurve } from './DifficultyCurve'
 import { QualityPanel } from './QualityPanel'
+import { ReportExplanation } from './ReportExplanation'
 import type { TestSession } from '../test/types'
 
 interface ResultsScreenProps {
@@ -31,6 +32,7 @@ export function ResultsScreen({ session, previousSession, onRestart, onHistory }
       <DirectionProfile thresholds={session.metrics.directionalThresholds} />
       <DifficultyCurve curve={session.metrics.difficultyCurve} />
       <QualityPanel session={session} />
+      <ReportExplanation session={session} />
       <section className="advanced-section"><button className="advanced-toggle" onClick={() => setAdvanced((value) => !value)}><span>{advanced ? '−' : '+'}</span> 查看技術資料 <small>{advanced ? '收起' : 'thresholds · trials · palettes · seeds'}</small></button>{advanced && <div className="advanced-panel"><div><span>Overall nominal dCDT</span><strong>{formatDcdt(session.overallDcdt)}</strong></div><div><span>Threshold method</span><strong>{session.metrics.directionalThresholds.map((item) => `D${item.directionId}: ${item.thresholdMethod ?? 'insufficient'}`).join(' · ')}</strong></div><div><span>Trial count</span><strong>{session.questions.length} total · {session.metrics.directionalThresholds.map((item) => `${item.trialCount} D${item.directionId}`).join(' · ')}</strong></div><div><span>Reversal count</span><strong>{session.metrics.directionalThresholds.map((item) => `${item.reversalCount} D${item.directionId}`).join(' · ')}</strong></div><div><span>Fit quality</span><strong>{session.metrics.directionalThresholds.map((item) => `${item.fitQuality?.toFixed(0) ?? '—'} D${item.directionId}`).join(' · ')}</strong></div><div><span>Stored palette / seed records</span><strong>{session.questions.length} / {session.questions.length}</strong></div></div>}</section>
       <div className="result-actions"><button className="button button-primary" onClick={onRestart}>重新挑戰 <span>→</span></button><button className="button button-quiet" onClick={onHistory}>查看歷史紀錄</button></div>
       <p className="disclaimer">本測試為螢幕色彩辨識挑戰。dCDT 為本次裝置與顯示條件下的相對估算值，可能受到螢幕顯色、亮度、色彩模式、環境光線及裝置差異影響，不作為醫療診斷依據。</p>
