@@ -14,3 +14,17 @@ it('can select every answer including zero and uses reproducible seeds', () => {
   expect(answers.size).toBe(100)
   expect(selectNextTrial(createEngineState(123))).toEqual(selectNextTrial(createEngineState(123)))
 })
+
+it('centers single digits without stretching them to the two-digit width', () => {
+  const bounds = (number: number) => {
+    const dots = buildDotLayout(number, 1).filter((dot) => dot.isFigure)
+    return { left: Math.min(...dots.map((dot) => dot.x)), right: Math.max(...dots.map((dot) => dot.x)), top: Math.min(...dots.map((dot) => dot.y)), bottom: Math.max(...dots.map((dot) => dot.y)) }
+  }
+  const single = bounds(8)
+  const double = bounds(88)
+  expect(single.right - single.left).toBeLessThan((double.right - double.left) * 0.55)
+  expect(single.bottom - single.top).toBeCloseTo(double.bottom - double.top, 1)
+  expect((single.left + single.right) / 2).toBeCloseTo(0.5, 1)
+  expect((single.right - single.left) * (5 / 3) / (single.bottom - single.top)).toBeGreaterThan(0.5)
+  expect((single.right - single.left) * (5 / 3) / (single.bottom - single.top)).toBeLessThan(0.9)
+})

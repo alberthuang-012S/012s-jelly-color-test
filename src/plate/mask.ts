@@ -34,12 +34,17 @@ export function buildDotLayout(
   const random = seededRandom(seed)
   const glyph = glyphForNumber(number)
   const glyphWidth = glyph[0].length
+  // The canvas is 5:3. Use square physical glyph cells, independent of digit count.
+  const cellHeight = 0.88 / 7
+  const cellWidth = cellHeight / (5 / 3)
+  const left = (1 - glyphWidth * cellWidth) / 2
+  const top = (1 - 7 * cellHeight) / 2
   const dots: PlateDot[] = []
   for (let row = 0; row < rows; row += 1) {
     for (let column = 0; column < columns; column += 1) {
-      const glyphRow = Math.min(6, Math.floor((row / rows) * 7))
-      const glyphColumn = Math.min(glyphWidth - 1, Math.floor((column / columns) * glyphWidth))
-      const isFigure = glyph[glyphRow][glyphColumn] === '1'
+      const glyphRow = Math.floor(((row + 0.5) / rows - top) / cellHeight)
+      const glyphColumn = Math.floor(((column + 0.5) / columns - left) / cellWidth)
+      const isFigure = glyphRow >= 0 && glyphRow < 7 && glyphColumn >= 0 && glyphColumn < glyphWidth && glyph[glyphRow][glyphColumn] === '1'
       const x = (column + 0.5 + (random() - 0.5) * 0.55) / columns
       const y = (row + 0.5 + (random() - 0.5) * 0.55) / rows
       const radius = 0.010 + random() * 0.004

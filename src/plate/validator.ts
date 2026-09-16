@@ -36,9 +36,10 @@ export function validatePlate(
   const density = figureDots.length / Math.max(1, dots.length)
   const rejectedReasons: string[] = []
   const checks = {
-    maskCoverage: density >= 0.18 && density <= 0.68,
+    // Centered single digits occupy less area than two-digit targets.
+    maskCoverage: density >= 0.08 && density <= 0.68,
     dotCount: dots.length >= 300 && dots.length <= 800,
-    figureBackgroundDensity: figureDots.length >= 90 && backgroundDots.length >= 180,
+    figureBackgroundDensity: figureDots.length >= 40 && backgroundDots.length >= 180,
     nominalChromaticDistance: Number.isFinite(expectedDistance) && actualDistance > 0 && Math.abs(actualDistance - expectedDistance) <= Math.max(0.0002, expectedDistance * 0.02) && Math.abs(renderedDistance - expectedDistance) <= Math.max(0.0002, expectedDistance * 0.02),
     meanLuminanceDifference: meanDifference <= 0.035,
     luminanceDistributionOverlap: overlap >= 0.55,

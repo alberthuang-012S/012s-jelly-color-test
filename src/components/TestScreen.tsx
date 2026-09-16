@@ -41,7 +41,7 @@ export function TestScreen({ engine, spec, plate, onAnswer }: TestScreenProps) {
         <div className="answer-area">
           <p className="answer-label">輸入你的答案，再按確認送出</p>
           <NumberPad key={spec.id} onAnswer={answer} disabled={locked} />
-          <p className="no-feedback-note">每題作答後會直接進入下一題。</p>
+          <p className="no-feedback-note">可用數字鍵輸入 · Enter 送出</p>
         </div>
       </section>
     </main>

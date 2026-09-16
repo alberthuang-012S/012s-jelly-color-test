@@ -271,6 +271,45 @@ h1 em, .result-hero em { font-style: normal; color: #d95a4a; }
   .history-compare small { flex-basis: 100%; margin-left: 0; }
 }
 
+/* Keep the stimulus and answer controls together; never crop the plate. */
+.test-page { max-width: 1180px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.test-page .test-topbar { min-height: 52px; gap: 12px; }
+.test-content { max-width: none; display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: center; gap: 16px 28px; padding: 20px 0 0; }
+.test-instruction { grid-column: 1 / -1; margin: 0; }
+.test-instruction h1 { font-size: clamp(22px, 3vw, 32px); margin: 0 0 4px; }
+.test-instruction p { margin: 0; }
+.test-page .plate-frame { width: 100%; max-width: calc((100dvh - 190px) * 5 / 3); justify-self: center; padding: 6px; box-shadow: 4px 4px 0 rgba(108,152,255,.13); }
+.answer-area { width: 100%; max-width: none; margin: 0; }
+.answer-label { margin: 0 0 8px; letter-spacing: .04em; }
+.answer-entry { width: 100%; max-width: none; }
+.answer-display-row { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 8px; margin-bottom: 8px; }
+.answer-input { min-width: 0; min-height: 44px; height: 44px; margin: 0; font-size: 24px; }
+.answer-display-row .answer-delete { grid-column: auto; min-height: 44px; }
+.number-pad { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.answer-zero { grid-column: auto; }
+.answer-button { min-height: 48px; touch-action: manipulation; }
+.answer-actions { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-top: 8px; }
+.answer-actions .answer-button { grid-column: auto; margin: 0; min-height: 44px; }
+.answer-area .no-feedback-note { margin: 8px 0 0; font-size: 10px; }
+.answer-button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+@media (max-width: 760px) and (orientation: portrait) {
+  .test-content { grid-template-columns: minmax(0, 1fr); gap: 12px; padding-top: 12px; }
+  .test-instruction { gap: 10px; }
+  .test-instruction h1 { font-size: 22px; }
+  .test-instruction p { font-size: 11px; }
+  .test-page .plate-frame { max-width: min(100%, calc((100dvh - 340px) * 5 / 3)); }
+  .answer-area { max-width: 440px; justify-self: center; }
+  .answer-area .no-feedback-note { display: none; }
+}
+@media (orientation: landscape) and (max-height: 540px) {
+  .test-page { width: calc(100% - 24px); }
+  .test-page .test-topbar { min-height: 36px; }
+  .test-content { grid-template-columns: minmax(0, 1fr) 260px; gap: 8px 16px; padding-top: 8px; }
+  .test-instruction h1 { font-size: 20px; }
+  .test-instruction p, .test-instruction .instruction-number, .answer-area .no-feedback-note { display: none; }
+  .test-page .plate-frame { max-width: calc((100dvh - 112px) * 5 / 3); }
+  .answer-button { min-height: 44px; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *:before, *:after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
