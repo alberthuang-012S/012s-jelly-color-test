@@ -46,6 +46,7 @@ export function generatePlate(request: PlateRequest): GeneratedPlate {
       backgroundColor: palette.backgroundColor,
       dots,
       validation,
+      regenerated: attempt > 0,
     }
     bestPlate = plate
     if (validation.productionValid) return plate

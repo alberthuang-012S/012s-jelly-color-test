@@ -62,6 +62,7 @@ export interface GeneratedPlate {
   backgroundColor: { r: number; g: number; b: number }
   dots: PlateDot[]
   validation: PlateValidation
+  regenerated: boolean
 }
 
 export interface TrialSpec {
