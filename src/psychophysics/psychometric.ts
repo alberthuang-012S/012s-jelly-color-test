@@ -88,6 +88,6 @@ export function fitPsychometricCurve(points: PsychometricPoint[]): PsychometricF
   }
 }
 
-export function psychometricProbability(distance: number, threshold: number, spread = 0.28): number {
+export function psychometricProbability(distance: number, threshold: number, spread = 0.55): number {
   return 0.5 + 0.5 * sigmoid((distance - threshold) / Math.max(threshold * spread, 0.001))
 }

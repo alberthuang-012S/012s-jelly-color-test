@@ -18,6 +18,9 @@ export interface SimulationResult {
   meanAbsoluteError: number
   sessions: number
   validSessions: number
+  averageTrialCount: number
+  minTrialCount: number
+  maxTrialCount: number
 }
 
 function median(values: number[]): number {
@@ -28,6 +31,7 @@ function median(values: number[]): number {
 
 export function runVirtualObserverSimulation(config: SimulationConfig): SimulationResult {
   const estimates: number[] = []
+  const trialCounts: number[] = []
   for (let sessionIndex = 0; sessionIndex < config.sessions; sessionIndex += 1) {
     const random = seededRandom(config.seed + sessionIndex * 131)
     let state = createEngineState()
@@ -49,6 +53,7 @@ export function runVirtualObserverSimulation(config: SimulationConfig): Simulati
       guard += 1
     }
     if (state.status !== 'complete') continue
+    trialCounts.push(state.questions.length)
     const session = buildTestSession(state, new Date(0).toISOString(), {
       viewport: 'simulation',
       devicePixelRatio: 1,
@@ -71,6 +76,9 @@ export function runVirtualObserverSimulation(config: SimulationConfig): Simulati
     meanAbsoluteError: absoluteErrors.length ? absoluteErrors.reduce((sum, value) => sum + value, 0) / absoluteErrors.length : Number.NaN,
     sessions: config.sessions,
     validSessions: estimates.length,
+    averageTrialCount: trialCounts.length ? trialCounts.reduce((sum, value) => sum + value, 0) / trialCounts.length : Number.NaN,
+    minTrialCount: trialCounts.length ? Math.min(...trialCounts) : 0,
+    maxTrialCount: trialCounts.length ? Math.max(...trialCounts) : 0,
   }
 }
 

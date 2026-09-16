@@ -74,10 +74,18 @@ function nextAnchor(state: TestEngineState): TestEngineState['anchorSlots'][numb
 }
 
 function hasActiveTrack(state: TestEngineState): boolean {
-  return DIRECTION_ORDER.some((directionId) => !state.tracks[directionId].converged && !state.calibrationFailed[directionId])
+  return !sessionAdaptiveCapReached(state) && DIRECTION_ORDER.some((directionId) => !state.tracks[directionId].converged && !state.calibrationFailed[directionId])
+}
+
+function sessionAdaptiveCapReached(state: TestEngineState): boolean {
+  const allTracksAtMinimum = DIRECTION_ORDER.every((directionId) =>
+    state.calibrationFailed[directionId] || state.tracks[directionId].trialCount >= adaptiveConfig.minimumTrials,
+  )
+  return allTracksAtMinimum && state.adaptiveTrialCount >= adaptiveConfig.maximumAdaptiveTrials
 }
 
 function chooseDirection(state: TestEngineState): ColorDirectionId | undefined {
+  if (sessionAdaptiveCapReached(state)) return undefined
   const candidates = DIRECTION_ORDER.filter((directionId) => !state.tracks[directionId].converged && !state.calibrationFailed[directionId])
   if (!candidates.length) return undefined
   for (let step = 0; step < DIRECTION_ORDER.length; step += 1) {
