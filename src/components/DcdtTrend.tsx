@@ -59,7 +59,7 @@ export function DcdtTrend({ sessions }: DcdtTrendProps) {
         </g>)}
         <text className="trend-axis-caption" x={left} y={height - 8}>較低 = 本次可辨識的色差較細微</text>
       </svg>
-      <p className="trend-footnote">趨勢只連結測量引擎、裝置與顯示條件相容且品質足夠的紀錄；它不是能力排名，也不是醫療判定。</p>
+      <p className="trend-footnote">趨勢只連結測量引擎、裝置與顯示條件相容且品質足夠的紀錄，用來閱讀自身紀錄的變化。</p>
     </div>
   )
 }

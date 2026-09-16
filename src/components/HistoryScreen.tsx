@@ -19,7 +19,7 @@ function displayDate(value: string): string {
 function statusLabel(session: TestSession, isComparable: boolean): string {
   if (isComparable) return '可納入趨勢'
   if (session.status === 'partial') return '未完成，僅保存'
-  return resultPresentation(session).usable ? '條件不同，僅保存' : '品質不足，僅保存'
+  return resultPresentation(session).usable ? '條件不同，僅保存' : '未納入趨勢，僅保存'
 }
 
 export function HistoryScreen({ sessions, onBack, onStart, onOpenSession }: HistoryScreenProps) {

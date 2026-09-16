@@ -57,7 +57,7 @@ export function calculateResultQualityIndex(
     extremeSlowCount: questions.filter((question) => question.responseTimeMs > 30_000).length,
     reasons: [
       controlQuality < 100 ? 'Control 題未完全通過' : undefined,
-      consistencyIndex < 65 ? `${consistencyLabel(consistencyIndex)}：回答模式較不穩定` : undefined,
+      consistencyIndex < 65 ? `${consistencyLabel(consistencyIndex)}：回答模式差異較大` : undefined,
       questions.some((question) => question.focusInterrupted) ? '有題目期間曾中斷畫面' : undefined,
       completion < 100 ? '部分 adaptive track 未達完整品質' : undefined,
     ].filter((reason): reason is string => Boolean(reason)),

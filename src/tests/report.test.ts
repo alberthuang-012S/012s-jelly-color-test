@@ -28,15 +28,17 @@ describe('report interpretation', () => {
     session.metrics.directionalThresholds[1].threshold = undefined
     expect(resultPresentation(session).qualityLabel).toBe('資料不足')
   })
-  it('keeps fallback or non-converged estimates tentative and advice limited', () => {
+  it('keeps fallback estimates readable without forcing retesting language', () => {
     const session = reportFixture()
     session.metrics.directionalThresholds[0].thresholdMethod = 'reversal-fallback'
     session.metrics.quality.interruptions = 2
     const view = resultPresentation(session)
     expect(view.tentative).toBe(true)
-    expect(view.qualityLabel).toBe('建議重測')
+    expect(view.qualityLabel).toBe('可供參考')
     expect(view.suggestions).toHaveLength(2)
     expect(view.suggestions[0]).toContain('中斷')
+    const copy = [view.qualityLabel, view.qualityReason, view.summary, ...view.suggestions].join(' ')
+    expect(copy).not.toMatch(/建議重測|不確定性|暫定|可信度|不穩定|有些波動/)
   })
   it('does not report stable answers without enough adaptive observations', () => {
     const session = reportFixture()
