@@ -7,6 +7,15 @@ function average(values: number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / Math.max(1, values.length)
 }
 
+/** Mean chromaticities of the actual quantized dot colors sent to canvas. */
+export function dotNominalDistance(dots: PlateDot[]): number {
+  const meanUv = (figure: boolean) => {
+    const colors = dots.filter((dot) => dot.isFigure === figure).map((dot) => rgbToUvPrime(dot.color))
+    return { u: average(colors.map((uv) => uv.u)), v: average(colors.map((uv) => uv.v)) }
+  }
+  return uvDistance(meanUv(true), meanUv(false))
+}
+
 export function validatePlate(
   dots: PlateDot[],
   figureColor: RGB,
@@ -21,6 +30,7 @@ export function validatePlate(
   const backgroundLuminance = backgroundColors.map(relativeLuminance)
   const overlap = distributionOverlap(luminanceDistribution(figureLuminance), luminanceDistribution(backgroundLuminance))
   const actualDistance = uvDistance(rgbToUvPrime(figureColor), rgbToUvPrime(backgroundColor))
+  const renderedDistance = dotNominalDistance(dots)
   const meanDifference = meanLuminanceDifference(figureColors, backgroundColors)
   const leakage = grayscaleLeakage(figureColors, backgroundColors)
   const density = figureDots.length / Math.max(1, dots.length)
@@ -29,11 +39,11 @@ export function validatePlate(
     maskCoverage: density >= 0.18 && density <= 0.68,
     dotCount: dots.length >= 300 && dots.length <= 800,
     figureBackgroundDensity: figureDots.length >= 90 && backgroundDots.length >= 180,
-    nominalChromaticDistance: actualDistance > 0 && Math.abs(actualDistance - expectedDistance) <= Math.max(0.006, expectedDistance * 0.2),
+    nominalChromaticDistance: Number.isFinite(expectedDistance) && actualDistance > 0 && Math.abs(actualDistance - expectedDistance) <= Math.max(0.0002, expectedDistance * 0.02) && Math.abs(renderedDistance - expectedDistance) <= Math.max(0.0002, expectedDistance * 0.02),
     meanLuminanceDifference: meanDifference <= 0.035,
     luminanceDistributionOverlap: overlap >= 0.55,
     grayscaleLeakage: leakage <= 0.18,
-    noInvalidRgbClipping: [...figureColors, ...backgroundColors].every(isInSrgbGamut),
+    noInvalidRgbClipping: [figureColor, backgroundColor, ...figureColors, ...backgroundColors].every(isInSrgbGamut) && dots.every((dot) => [dot.x, dot.y, dot.radius].every(Number.isFinite) && dot.radius > 0),
   }
   Object.entries(checks).forEach(([key, passed]) => {
     if (!passed) rejectedReasons.push(key)

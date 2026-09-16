@@ -11,7 +11,7 @@ function anchorAgreement(questions: QuestionResult[]): number {
       list.push(question)
       grouped.set(question.anchorKey as string, list)
     })
-  const pairs = [...grouped.values()].filter((group) => group.length >= 2)
+  const pairs = [...grouped.values()].filter((group) => group.length === 2 && group[0].directionId === group[1].directionId && group[0].requestedDistance === group[1].requestedDistance)
   if (!pairs.length) return 50
   return (pairs.reduce((sum, pair) => sum + (pair[0].correct === pair[1].correct ? 100 : 0), 0) / pairs.length)
 }
@@ -26,6 +26,7 @@ function monotonicity(questions: QuestionResult[]): number {
     for (let secondIndex = firstIndex + 1; secondIndex < valid.length; secondIndex += 1) {
       const first = valid[firstIndex]
       const second = valid[secondIndex]
+      if (first.directionId !== second.directionId) continue
       if ((second.nominalDeltaUv as number) - (first.nominalDeltaUv as number) < 0.001) continue
       comparablePairs += 1
       if (first.correct && !second.correct) inversions += 1
@@ -41,17 +42,14 @@ function fitQuality(questions: QuestionResult[]): number {
     .filter((question) => question.phase !== 'control' && question.nominalDeltaUv !== undefined)
     .map((question) => ({ distance: question.nominalDeltaUv as number, correct: question.correct }))
   const fit = fitPsychometricCurve(points)
-  if (fit) return fit.quality
-  if (!points.length) return 0
-  const sorted = [...points].sort((first, second) => first.distance - second.distance)
-  const inversionCount = sorted.slice(1).reduce((count, point, index) => count + (sorted[index].correct && !point.correct ? 1 : 0), 0)
-  return clamp(1 - inversionCount / Math.max(1, sorted.length - 1)) * 100
+  if (fit?.converged) return fit.quality
+  return 0
 }
 
 export function calculateConsistencyIndex(questions: QuestionResult[]): ConsistencyBreakdown {
   const anchor = anchorAgreement(questions)
   const mono = monotonicity(questions)
-  const fit = fitQuality(questions)
+  const fit = ['A', 'B', 'C'].reduce((sum, direction) => sum + fitQuality(questions.filter((question) => question.directionId === direction && question.phase === 'adaptive')), 0) / 3
   const score = Math.round(anchor * 0.4 + mono * 0.3 + fit * 0.3)
   return {
     score: clamp(score, 0, 100),

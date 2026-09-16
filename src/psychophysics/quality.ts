@@ -1,5 +1,7 @@
 import { clamp } from './colorSpace'
 import { consistencyLabel } from './consistency'
+import { adaptiveConfig, DIRECTION_ORDER } from './config'
+import { estimateThreshold } from './threshold'
 import type { QualityBreakdown, QuestionResult, TestEngineState } from '../test/types'
 
 export function timingFlagFor(responseTimeMs: number, focusInterrupted: boolean): string | undefined {
@@ -21,12 +23,15 @@ function timingQuality(questions: QuestionResult[]): number {
 }
 
 function completionQuality(engine: TestEngineState): number {
-  if (engine.status === 'complete') {
-    const failed = Object.values(engine.calibrationFailed).filter(Boolean).length
-    return clamp(1 - failed * 0.2) * 100
-  }
-  if (engine.questions.length < 10) return 20
-  return 55
+  return DIRECTION_ORDER.reduce((sum, direction) => {
+    const track = engine.tracks[direction]
+    if (!engine.calibrationComplete[direction] || engine.calibrationFailed[direction]) return sum
+    const threshold = estimateThreshold(direction, engine.questions, track)
+    const coverage = Math.min(1, track.trialCount / adaptiveConfig.minimumTrials)
+    const reversals = Math.min(1, track.reversals.length / adaptiveConfig.targetReversals)
+    const anchors = engine.anchorSlots.filter((slot) => slot.directionId === direction && slot.answered).length / 2
+    return sum + coverage * 25 + reversals * 25 + (threshold.threshold !== undefined ? 40 : 0) + anchors * 10
+  }, 0) / 3
 }
 
 export function calculateResultQualityIndex(
@@ -35,7 +40,7 @@ export function calculateResultQualityIndex(
   engine: TestEngineState,
 ): QualityBreakdown {
   const control = questions.filter((question) => question.phase === 'control')
-  const controlQuality = (control.filter((question) => question.correct).length / 2) * 100
+  const controlQuality = Math.min(1, control.filter((question) => question.correct).length / 2) * 100
   const time = timingQuality(questions)
   const completion = completionQuality(engine)
   const score = Math.round(controlQuality * 0.3 + consistencyIndex * 0.3 + time * 0.2 + completion * 0.2)

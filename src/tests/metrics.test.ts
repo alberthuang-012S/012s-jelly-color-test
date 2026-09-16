@@ -3,7 +3,7 @@ import { calculateConsistencyIndex } from '../psychophysics/consistency'
 import { question } from './fixtures'
 
 describe('consistency index', () => {
-  it('scores a monotonic, repeated anchor pattern highly', () => {
+  it('does not award fit quality for insufficient observations', () => {
     const questions = [
       question({ id: 'a1', nominalDeltaUv: 0.01, correct: false, answer: null }),
       question({ id: 'a2', nominalDeltaUv: 0.02, correct: true, anchorKey: 'anchor-A-0', phase: 'anchor' }),
@@ -11,7 +11,8 @@ describe('consistency index', () => {
       question({ id: 'a4', nominalDeltaUv: 0.04, correct: true }),
     ]
     const result = calculateConsistencyIndex(questions)
-    expect(result.score).toBeGreaterThanOrEqual(80)
+    expect(result.score).toBeLessThan(80)
+    expect(result.fitQuality).toBe(0)
     expect(result.anchorAgreement).toBe(100)
   })
 

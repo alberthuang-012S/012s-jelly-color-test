@@ -21,13 +21,16 @@ function App() {
   const trialStartedAt = useRef(0)
   const focusInterrupted = useRef(false)
   const spec = useMemo(() => engine ? selectNextTrial(engine) : null, [engine])
-  const plate = useMemo(() => spec ? generatePlate({
+  const generated = useMemo(() => {
+    try { return { plate: spec ? generatePlate({
     direction: spec.directionId,
     requestedDistance: spec.requestedDistance,
     number: spec.targetNumber,
     seed: spec.seed,
     phase: spec.phase,
-  }) : null, [spec])
+    }) : null, error: false } } catch { return { plate: null, error: true } }
+  }, [spec])
+  const plate = generated.plate
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -70,8 +73,9 @@ function App() {
   }
 
   if (screen === 'environment') return <EnvironmentCheck onContinue={begin} onBack={() => setScreen('start')} />
+  if (screen === 'test' && generated.error) return <main className="page-shell"><h1>題板未通過品質檢查</h1><p>已停止測量，本次未產生分數。請重新開始。</p><button className="button button-primary" onClick={restart}>重新開始</button></main>
   if (screen === 'test' && engine && spec && plate) return <TestScreen engine={engine} spec={spec} plate={plate} onAnswer={answer} />
-  if (screen === 'results' && session) return <ResultsScreen session={session} previousSession={history.find((item) => item.id !== session.id)} onRestart={restart} onHistory={() => setScreen('history')} />
+  if (screen === 'results' && session) return <ResultsScreen session={session} previousSession={session.resultQualityIndex >= 60 ? history.find((item) => item.id !== session.id && item.resultQualityIndex >= 60 && item.status === 'complete' && item.engineVersion === session.engineVersion) : undefined} onRestart={restart} onHistory={() => setScreen('history')} />
   if (screen === 'history') return <HistoryScreen sessions={history} onBack={() => setScreen(session ? 'results' : 'start')} onStart={restart} />
   return <StartScreen onStart={() => setScreen('environment')} onHistory={() => setScreen('history')} sessionCount={history.length} />
 }

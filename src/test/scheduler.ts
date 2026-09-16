@@ -22,11 +22,13 @@ function snapshot(state: TestEngineState['tracks'][ColorDirectionId]): Staircase
     trialCount: state.trialCount,
     correctCount: state.correctCount,
     converged: state.converged,
+    stopped: state.stopped,
   }
 }
 
-export function createEngineState(): TestEngineState {
+export function createEngineState(seed = Math.floor(Math.random() * 0x100000000)): TestEngineState {
   return {
+    seed,
     phase: 'control',
     status: 'in-progress',
     controlIndex: 0,
@@ -66,27 +68,19 @@ function anchorNumber(directionId: ColorDirectionId, index: number): number {
 }
 
 function seedFor(state: TestEngineState, offset = 0): number {
-  return 1701 + state.questions.length * 7919 + offset * 97
+  return state.seed + state.questions.length * 7919 + offset * 97
 }
 
 function nextAnchor(state: TestEngineState): TestEngineState['anchorSlots'][number] | undefined {
-  return state.anchorSlots.find((slot) => !slot.answered && (state.adaptiveTrialCount >= slot.at || !hasActiveTrack(state)))
+  return state.anchorSlots.find((slot) => !slot.answered && !state.calibrationFailed[slot.directionId] && (state.adaptiveTrialCount >= slot.at || !hasActiveTrack(state)))
 }
 
 function hasActiveTrack(state: TestEngineState): boolean {
-  return !sessionAdaptiveCapReached(state) && DIRECTION_ORDER.some((directionId) => !state.tracks[directionId].converged && !state.calibrationFailed[directionId])
-}
-
-function sessionAdaptiveCapReached(state: TestEngineState): boolean {
-  const allTracksAtMinimum = DIRECTION_ORDER.every((directionId) =>
-    state.calibrationFailed[directionId] || state.tracks[directionId].trialCount >= adaptiveConfig.minimumTrials,
-  )
-  return allTracksAtMinimum && state.adaptiveTrialCount >= adaptiveConfig.maximumAdaptiveTrials
+  return DIRECTION_ORDER.some((directionId) => !state.tracks[directionId].stopped && !state.calibrationFailed[directionId])
 }
 
 function chooseDirection(state: TestEngineState): ColorDirectionId | undefined {
-  if (sessionAdaptiveCapReached(state)) return undefined
-  const candidates = DIRECTION_ORDER.filter((directionId) => !state.tracks[directionId].converged && !state.calibrationFailed[directionId])
+  const candidates = DIRECTION_ORDER.filter((directionId) => !state.tracks[directionId].stopped && !state.calibrationFailed[directionId])
   if (!candidates.length) return undefined
   for (let step = 0; step < DIRECTION_ORDER.length; step += 1) {
     const directionId = DIRECTION_ORDER[(state.schedulerCursor + step) % DIRECTION_ORDER.length]
@@ -143,7 +137,7 @@ export function selectNextTrial(state: TestEngineState): TrialSpec | null {
       seed: seedFor(state, track.trialCount),
     }
   }
-  const remainingAnchor = state.anchorSlots.find((slot) => !slot.answered)
+  const remainingAnchor = state.anchorSlots.find((slot) => !slot.answered && !state.calibrationFailed[slot.directionId])
   if (remainingAnchor) {
     const directionId = remainingAnchor.directionId
     return {
@@ -174,6 +168,16 @@ export function recordTrial(
   focusInterrupted: boolean,
   plate: GeneratedPlate,
 ): TestEngineState {
+  const expected = selectNextTrial(state)
+  if (!expected || JSON.stringify(expected) !== JSON.stringify(spec)) throw new Error('Stale or unexpected trial')
+  if (!plate.validation.productionValid || !Number.isFinite(plate.actualNominalDeltaUv) || plate.actualNominalDeltaUv <= 0) {
+    throw new Error('Invalid plate cannot enter measurement')
+  }
+  if (plate.seed !== spec.seed || plate.targetNumber !== spec.targetNumber || plate.requestedDistance !== spec.requestedDistance ||
+      (spec.directionId && plate.directionId !== spec.directionId)) throw new Error('Plate does not match trial')
+  if (!Number.isFinite(responseTimeMs) || responseTimeMs < 0 || (answer !== null && (!Number.isInteger(answer) || answer < 0 || answer > 99))) {
+    throw new Error('Invalid response')
+  }
   const correct = answer !== null && answer === spec.targetNumber
   const track = spec.directionId ? state.tracks[spec.directionId] : undefined
   const result: QuestionResult = {
@@ -209,11 +213,11 @@ export function recordTrial(
     const tracks = { ...state.tracks }
     if (successful) {
       calibrationComplete[directionId] = true
-      tracks[directionId] = { ...tracks[directionId], currentDistance: Math.max(adaptiveConfig.minDistance, spec.requestedDistance * 0.72) }
+      tracks[directionId] = { ...tracks[directionId], currentDistance: Math.max(adaptiveConfig.minDistance, plate.actualNominalDeltaUv * 0.72) }
     } else if (atMax) {
       calibrationFailed[directionId] = true
       calibrationComplete[directionId] = true
-      tracks[directionId] = { ...tracks[directionId], converged: true, convergenceQuality: 'low', insufficientCalibration: true }
+      tracks[directionId] = { ...tracks[directionId], stopped: true, converged: false, convergenceQuality: 'low', insufficientCalibration: true }
     } else {
       calibrationDistances[directionId] = Math.min(adaptiveConfig.calibrationMaxContrast, spec.requestedDistance * 1.25)
     }
@@ -230,7 +234,7 @@ export function recordTrial(
     }
   } else if (spec.phase === 'adaptive' && spec.directionId) {
     const directionIndex = DIRECTION_ORDER.indexOf(spec.directionId)
-    const updatedTrack = updateStaircase(state.tracks[spec.directionId], correct)
+    const updatedTrack = updateStaircase(state.tracks[spec.directionId], correct, adaptiveConfig, plate.actualNominalDeltaUv)
     next = {
       ...next,
       tracks: { ...state.tracks, [spec.directionId]: updatedTrack },
@@ -256,6 +260,7 @@ export function recordTrial(
 }
 
 export function progressPercent(state: TestEngineState): number {
+  if (state.status === 'complete') return 100
   const trackProgress = DIRECTION_ORDER.reduce((sum, directionId) => {
     const track = state.tracks[directionId]
     return sum + Math.min(1, track.trialCount / adaptiveConfig.maximumTrials)

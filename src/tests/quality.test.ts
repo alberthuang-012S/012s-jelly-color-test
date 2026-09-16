@@ -4,7 +4,7 @@ import { createEngineState } from '../test/scheduler'
 import { question } from './fixtures'
 
 describe('result quality index', () => {
-  it('is high for complete, controlled, consistent data', () => {
+  it('does not grant completion quality merely from a complete status', () => {
     const engine = { ...createEngineState(), status: 'complete' as const }
     const questions = [
       question({ id: 'c1', phase: 'control', correct: true, directionId: undefined, nominalDeltaUv: undefined }),
@@ -12,8 +12,8 @@ describe('result quality index', () => {
       ...Array.from({ length: 12 }, (_, index) => question({ id: `a-${index}`, nominalDeltaUv: 0.01 + index * 0.003, correct: true, responseTimeMs: 800 })),
     ]
     const result = calculateResultQualityIndex(questions, 95, engine)
-    expect(result.score).toBeGreaterThanOrEqual(90)
-    expect(result.classification).toBe('HIGH')
+    expect(result.score).toBeLessThan(90)
+    expect(result.completionQuality).toBe(0)
   })
 
   it('is low when controls fail and timing/focus anomalies accumulate', () => {

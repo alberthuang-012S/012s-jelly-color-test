@@ -76,7 +76,18 @@ export function fitPsychometricCurve(points: PsychometricPoint[]): PsychometricF
   if (!Number.isFinite(threshold75) || threshold75 <= 0) return null
   const predictions = xs.map((x) => sigmoid(intercept + slope * x))
   const rmse = Math.sqrt(predictions.reduce((sum, prediction, index) => sum + (prediction - ys[index]) ** 2, 0) / predictions.length)
-  const quality = clamp(1 - rmse / 0.5) * 100
+  // Descriptive calibration score. Remove expected Bernoulli sampling variance
+  // from distance-bin residuals instead of punishing normal trial-level noise.
+  const ordered = valid.map((point, index) => ({ point, prediction: predictions[index] })).sort((a, b) => a.point.distance - b.point.distance)
+  let excessError = 0
+  for (let bin = 0; bin < 3; bin += 1) {
+    const group = ordered.slice(Math.floor(bin * ordered.length / 3), Math.floor((bin + 1) * ordered.length / 3))
+    const observed = group.reduce((sum, item) => sum + Number(item.point.correct), 0) / group.length
+    const predicted = group.reduce((sum, item) => sum + item.prediction, 0) / group.length
+    const variance = group.reduce((sum, item) => sum + item.prediction * (1 - item.prediction), 0) / group.length ** 2
+    excessError += Math.max(0, (observed - predicted) ** 2 - variance) / 3
+  }
+  const quality = clamp(1 - Math.sqrt(excessError) / 0.5) * 100
   return {
     intercept,
     slope,
@@ -88,6 +99,6 @@ export function fitPsychometricCurve(points: PsychometricPoint[]): PsychometricF
   }
 }
 
-export function psychometricProbability(distance: number, threshold: number, spread = 0.55): number {
-  return 0.5 + 0.5 * sigmoid((distance - threshold) / Math.max(threshold * spread, 0.001))
+export function psychometricProbability(distance: number, threshold: number, slope = 4): number {
+  return sigmoid(Math.log(3) + slope * Math.log(distance / threshold))
 }

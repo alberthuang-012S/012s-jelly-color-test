@@ -27,8 +27,8 @@ export function clamp(value: number, min = 0, max = 1): number {
   return Math.min(max, Math.max(min, value))
 }
 
-export function rgbToLinearChannel(value: number): number {
-  const normalized = value > 1 ? value / 255 : value
+/** Encoded normalized channel; RGB objects use byte-scale channels. */
+export function rgbToLinearChannel(normalized: number): number {
   return normalized <= 0.04045
     ? normalized / 12.92
     : ((normalized + 0.055) / 1.055) ** 2.4
@@ -36,10 +36,25 @@ export function rgbToLinearChannel(value: number): number {
 
 export function rgbToLinearRgb(rgb: RGB): RGB {
   return {
-    r: rgbToLinearChannel(rgb.r),
-    g: rgbToLinearChannel(rgb.g),
-    b: rgbToLinearChannel(rgb.b),
+    r: rgbToLinearChannel(rgb.r / 255),
+    g: rgbToLinearChannel(rgb.g / 255),
+    b: rgbToLinearChannel(rgb.b / 255),
   }
+}
+
+export function linearRgbToRgb(rgb: RGB): RGB {
+  const encode = (value: number) => 255 * (value <= 0.0031308 ? 12.92 * value : 1.055 * value ** (1 / 2.4) - 0.055)
+  return { r: encode(rgb.r), g: encode(rgb.g), b: encode(rgb.b) }
+}
+
+export function uvPrimeToRgb(uv: UvPrime, luminance: number): RGB {
+  const x = 9 * luminance * uv.u / (4 * uv.v)
+  const z = luminance * (12 - 3 * uv.u - 20 * uv.v) / (4 * uv.v)
+  return linearRgbToRgb({
+    r: 3.2404542 * x - 1.5371385 * luminance - 0.4985314 * z,
+    g: -0.969266 * x + 1.8760108 * luminance + 0.041556 * z,
+    b: 0.0556434 * x - 0.2040259 * luminance + 1.0572252 * z,
+  })
 }
 
 export function linearRgbToXyz(rgb: RGB): XYZ {

@@ -1,6 +1,4 @@
 import { generatePlate } from '../plate/generator'
-import { psychometricProbability } from '../psychophysics/psychometric'
-import { DIRECTION_ORDER } from '../psychophysics/config'
 import { buildTestSession } from '../test/session'
 import { createEngineState, recordTrial, selectNextTrial } from '../test/scheduler'
 import { seededRandom } from '../plate/rng'
@@ -34,7 +32,7 @@ export function runVirtualObserverSimulation(config: SimulationConfig): Simulati
   const trialCounts: number[] = []
   for (let sessionIndex = 0; sessionIndex < config.sessions; sessionIndex += 1) {
     const random = seededRandom(config.seed + sessionIndex * 131)
-    let state = createEngineState()
+    let state = createEngineState(config.seed + sessionIndex * 131)
     let guard = 0
     while (state.status === 'in-progress' && guard < 160) {
       const spec = selectNextTrial(state)
@@ -46,13 +44,14 @@ export function runVirtualObserverSimulation(config: SimulationConfig): Simulati
         seed: spec.seed,
         phase: spec.phase,
       })
-      const probability = spec.phase === 'control' ? 0.985 : psychometricProbability(plate.actualNominalDeltaUv, config.threshold)
+      // Independent open-response observer: P(correct | threshold) = .75, no 50% guessing floor.
+      const probability = spec.phase === 'control' ? 0.985 : 1 / (1 + Math.exp(-(Math.log(3) + 4 * Math.log(plate.actualNominalDeltaUv / config.threshold))))
       const correct = random() < probability
       const answer = correct ? spec.targetNumber : null
       state = recordTrial(state, spec, answer, 600 + random() * 900, false, plate)
       guard += 1
     }
-    if (state.status !== 'complete') continue
+    if (state.status !== 'complete') throw new Error('Simulation did not terminate')
     trialCounts.push(state.questions.length)
     const session = buildTestSession(state, new Date(0).toISOString(), {
       viewport: 'simulation',
@@ -85,5 +84,3 @@ export function runVirtualObserverSimulation(config: SimulationConfig): Simulati
 export function runAllSimulationGroups(sessions = 500): SimulationResult[] {
   return [0.01, 0.02, 0.04].map((threshold, index) => runVirtualObserverSimulation({ threshold, sessions, seed: 4200 + index * 100 }))
 }
-
-void DIRECTION_ORDER

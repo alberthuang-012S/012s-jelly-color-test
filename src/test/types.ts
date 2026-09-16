@@ -14,11 +14,13 @@ export interface StaircaseState {
   trialCount: number
   correctCount: number
   converged: boolean
+  stopped?: boolean
   convergenceQuality: 'pending' | 'high' | 'low'
   insufficientCalibration: boolean
 }
 
 export interface StaircaseSnapshot {
+  stopped?: boolean
   currentDistance: number
   currentStep: number
   consecutiveCorrect: number
@@ -169,6 +171,7 @@ export interface SessionMetrics {
 }
 
 export interface TestEngineState {
+  seed: number
   phase: TestPhase
   status: 'in-progress' | 'complete' | 'partial'
   controlIndex: number
@@ -187,6 +190,7 @@ export interface TestEngineState {
 }
 
 export interface TestSession {
+  engineVersion?: string
   id: string
   startedAt: string
   completedAt?: string

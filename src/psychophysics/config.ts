@@ -18,7 +18,6 @@ export const adaptiveConfig = {
   stepFactors: [1, 1, 0.6, 0.6, 0.35],
   minimumTrials: 10,
   maximumTrials: 18,
-  maximumAdaptiveTrials: 35,
   targetReversals: 7,
   thresholdCriterion: 0.75,
   anchorCountPerDirection: 2,

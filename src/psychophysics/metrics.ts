@@ -39,7 +39,7 @@ function contrastBands(questions: QuestionResult[]): DifficultyCurve['bands'] {
         question.phase !== 'control' &&
         question.nominalDeltaUv !== undefined &&
         (question.nominalDeltaUv as number) >= min &&
-        (question.nominalDeltaUv as number) <= max,
+        (question.nominalDeltaUv as number) < max,
     )
     return {
       label,
@@ -65,16 +65,18 @@ function buildDifficultyCurve(questions: QuestionResult[]): DifficultyCurve {
   const observed = [...grouped.values()]
     .sort((a, b) => a.distance - b.distance)
     .map((point) => ({ distance: point.distance, probability: point.correct / point.count, count: point.count }))
-  const fit = fitPsychometricCurve(valid.map((question) => ({ distance: question.nominalDeltaUv as number, correct: question.correct })))
+  // A pooled curve is descriptive only: fit each direction separately, then
+  // average probabilities. Do not infer an overall 75% threshold from pooling.
+  const fits = DIRECTION_ORDER.map((direction) => fitPsychometricCurve(valid.filter((question) => question.phase === 'adaptive' && question.directionId === direction).map((question) => ({ distance: question.nominalDeltaUv as number, correct: question.correct })))).filter((fit) => fit?.converged)
   const min = Math.min(...valid.map((question) => question.nominalDeltaUv as number), 0.004)
   const max = Math.max(...valid.map((question) => question.nominalDeltaUv as number), 0.06)
-  const curve = fit
+  const curve = fits.length === 3
     ? Array.from({ length: 32 }, (_, index) => {
         const distance = min + ((max - min) * index) / 31
-        return { distance, probability: fit.predict(distance) }
+        return { distance, probability: fits.reduce((sum, fit) => sum + fit!.predict(distance), 0) / fits.length }
       })
     : []
-  return { observed, fitted: curve, threshold75: fit?.threshold75, bands: contrastBands(questions) }
+  return { observed, fitted: curve, bands: contrastBands(questions) }
 }
 
 export function calculateAllMetrics(engine: TestEngineState): SessionMetrics {

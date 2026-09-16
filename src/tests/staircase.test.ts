@@ -40,8 +40,10 @@ describe('2-down / 1-up staircase', () => {
 
   it('stops on the maximum trial guard even without convergence', () => {
     let state = createStaircase('A', 0.03)
-    for (let index = 0; index < 18; index += 1) state = updateStaircase(state, index % 3 !== 0)
-    expect(state.converged).toBe(true)
+    for (let index = 0; index < 18; index += 1) state = updateStaircase(state, true)
+    expect(state.stopped).toBe(true)
+    expect(state.converged).toBe(false)
+    expect(state.convergenceQuality).toBe('low')
     expect(state.trialCount).toBe(18)
   })
 })

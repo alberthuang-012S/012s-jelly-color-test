@@ -13,7 +13,8 @@ describe('CIE 1976 u′v′ color space', () => {
 
   it('linearizes the sRGB knee correctly', () => {
     expect(rgbToLinearRgb({ r: 0, g: 12.92, b: 255 }).r).toBe(0)
-    expect(rgbToLinearRgb({ r: 0.04045, g: 0.04045, b: 0.04045 }).r).toBeCloseTo(0.00313, 4)
+    expect(rgbToLinearRgb({ r: 0.04045 * 255, g: 0, b: 0 }).r).toBeCloseTo(0.00313, 4)
+    expect(rgbToLinearRgb({ r: 1, g: 1, b: 1 }).r).toBeCloseTo(1 / 255 / 12.92, 8)
     expect(rgbToLinearRgb({ r: 255, g: 255, b: 255 }).r).toBeCloseTo(1, 8)
   })
 

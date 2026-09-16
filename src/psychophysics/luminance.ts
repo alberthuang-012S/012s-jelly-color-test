@@ -1,6 +1,6 @@
 import { clamp, relativeLuminance, type RGB } from './colorSpace'
 
-export function luminanceDistribution(values: number[], binCount = 8, minimum = 0, maximum = 1): number[] {
+export function luminanceDistribution(values: number[], binCount = 64, minimum = 0, maximum = 1): number[] {
   if (!values.length) return Array.from({ length: binCount }, () => 0)
   const span = Math.max(maximum - minimum, 1e-9)
   const bins = Array.from({ length: binCount }, () => 0)

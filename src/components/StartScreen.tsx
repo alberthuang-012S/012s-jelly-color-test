@@ -23,7 +23,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
             <button className="button button-primary" onClick={onStart}>開始挑戰 <span>→</span></button>
             <button className="button button-quiet" onClick={onHistory}>查看歷史 {sessionCount > 0 ? `· ${sessionCount}` : ''}</button>
           </div>
-          <div className="micro-note"><span className="status-pulse" /> 約 35–50 題 · 約 4 分鐘 · 不即時揭示答案</div>
+          <div className="micro-note"><span className="status-pulse" /> 通常 41–71 題，依校準與收斂狀況調整 · 不即時揭示答案</div>
         </div>
         <div className="hero-visual" aria-hidden="true">
           <div className="visual-ring ring-one" />

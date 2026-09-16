@@ -39,8 +39,8 @@ export function TestScreen({ engine, spec, plate, onAnswer }: TestScreenProps) {
         <div className="test-instruction"><span className="instruction-number">01</span><div><h1>你看到了什麼數字？</h1><p>仔細觀看圓點，輸入你辨識到的數字。</p></div></div>
         <div className="plate-frame"><PlateCanvas plate={plate} /></div>
         <div className="answer-area">
-          <p className="answer-label">選擇你的答案</p>
-          <NumberPad onAnswer={answer} disabled={locked} />
+          <p className="answer-label">輸入你的答案，再按確認送出</p>
+          <NumberPad key={spec.id} onAnswer={answer} disabled={locked} />
           <p className="no-feedback-note">每題作答後會直接進入下一題。</p>
         </div>
       </section>

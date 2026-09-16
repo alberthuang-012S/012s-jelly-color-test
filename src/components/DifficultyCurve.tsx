@@ -24,7 +24,7 @@ export function DifficultyCurve({ curve }: DifficultyCurveProps) {
   const markerX = curve.threshold75 === undefined ? undefined : x(curve.threshold75)
   return (
     <section className="result-section curve-section">
-      <div className="section-heading"><div><span className="section-kicker">03 / CHROMATIC DIFFICULTY CURVE</span><h2>色差越細微，辨識機率如何變化？</h2></div><span className="section-index">75% FIT</span></div>
+      <div className="section-heading"><div><span className="section-kicker">03 / CHROMATIC DIFFICULTY CURVE</span><h2>色差越細微，辨識機率如何變化？</h2></div><span className="section-index">{curve.fitted.length ? 'DIRECTION FITS' : 'OBSERVED DATA'}</span></div>
       <div className="curve-card">
         <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="色差與正確機率曲線">
           <line className="axis-line" x1={left} x2={width - right} y1={height - bottom} y2={height - bottom} />
@@ -41,7 +41,7 @@ export function DifficultyCurve({ curve }: DifficultyCurveProps) {
       <div className="band-grid">
         {curve.bands.map((band) => <div key={band.label} className="band-item"><span>{band.label}</span><strong>{band.accuracy.toFixed(1)}%</strong><small>{band.count} trials · session-relative</small></div>)}
       </div>
-      <p className="footnote">X 軸為 nominal Δu′v′，不是實際量測到的面板光譜輸出。</p>
+      <p className="footnote">曲線為三方向各自擬合後的平均機率，僅供描述，不用來估算整體門檻。X 軸為 nominal Δu′v′，不是實際量測到的面板光譜輸出。</p>
     </section>
   )
 }

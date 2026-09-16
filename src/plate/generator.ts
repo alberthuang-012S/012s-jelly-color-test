@@ -1,8 +1,8 @@
-import { rgbToUvPrime, type RGB } from '../psychophysics/colorSpace'
+import { rgbToUvPrime, rgbToLinearRgb, linearRgbToRgb, type RGB } from '../psychophysics/colorSpace'
 import { seededRandom } from './rng'
 import { buildDotLayout } from './mask'
 import { generatePalette } from './palettes'
-import { validatePlate } from './validator'
+import { validatePlate, dotNominalDistance } from './validator'
 import type { ColorDirectionId, GeneratedPlate } from '../test/types'
 
 export interface PlateRequest {
@@ -15,11 +15,9 @@ export interface PlateRequest {
 
 function noisyColor(base: RGB, random: () => number): RGB {
   const factor = 0.91 + random() * 0.18
-  return {
-    r: base.r * factor,
-    g: base.g * factor,
-    b: base.b * factor,
-  }
+  const linear = rgbToLinearRgb(base)
+  const encoded = linearRgbToRgb({ r: linear.r * factor, g: linear.g * factor, b: linear.b * factor })
+  return { r: Math.round(encoded.r), g: Math.round(encoded.g), b: Math.round(encoded.b) }
 }
 
 export function generatePlate(request: PlateRequest): GeneratedPlate {
@@ -41,7 +39,7 @@ export function generatePlate(request: PlateRequest): GeneratedPlate {
       targetNumber: request.number,
       directionId: direction,
       requestedDistance: request.requestedDistance,
-      actualNominalDeltaUv: palette.actualNominalDeltaUv,
+      actualNominalDeltaUv: dotNominalDistance(dots),
       figureColor: palette.figureColor,
       backgroundColor: palette.backgroundColor,
       dots,
@@ -51,7 +49,7 @@ export function generatePlate(request: PlateRequest): GeneratedPlate {
     bestPlate = plate
     if (validation.productionValid) return plate
   }
-  return bestPlate as GeneratedPlate
+  throw new Error(`Plate validation failed: ${bestPlate?.validation.rejectedReasons.join(', ')}`)
 }
 
 export function rgbText(rgb: RGB): string {
