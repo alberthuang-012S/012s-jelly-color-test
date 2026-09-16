@@ -22,6 +22,7 @@ export function buildTestSession(engine: TestEngineState, startedAt: string, dev
   return {
     id: `session-${Date.now()}`,
     engineVersion: 'uv4-proportional-targets',
+    environmentConfirmed: engine.environmentConfirmed === true,
     startedAt,
     completedAt: new Date().toISOString(),
     deviceInfo,

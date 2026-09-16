@@ -89,6 +89,12 @@ describe('measurement engine invariants', () => {
     expect(plate.actualNominalDeltaUv).toBe(dotNominalDistance(plate.dots))
     expect(recordTrial(state, spec, 6, 800, false, plate).questions[0].nominalDeltaUv).toBe(plate.actualNominalDeltaUv)
   })
+  it('preserves an external focus interruption as a quality signal', () => {
+    const state = createEngineState(123)
+    const { spec, plate } = next(state)
+    const updated = recordTrial(state, spec, null, 800, true, plate)
+    expect(updated.questions[0]).toMatchObject({ focusInterrupted: true, timingFlag: 'focus-interrupted' })
+  })
   it('fails closed for unsupported distances and invalid geometry', () => {
     expect(() => generatePalette('A', 0.2, 1)).toThrow()
     expect(() => generatePalette('A', NaN, 1)).toThrow()

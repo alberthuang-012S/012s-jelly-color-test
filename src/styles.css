@@ -377,3 +377,79 @@ h1 em, .result-hero em { font-style: normal; color: #d95a4a; }
 @media (prefers-reduced-motion: reduce) {
   *, *:before, *:after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
+
+/* Phase 2A interaction details. */
+.environment-check-item { cursor: pointer; }
+.environment-check-item input { position: absolute; opacity: 0; pointer-events: none; }
+.environment-check-item .check-icon { background: transparent; border: 1px solid var(--line); color: transparent; transition: background .18s, color .18s; }
+.environment-check-item.is-checked .check-icon { background: var(--acid); border-color: var(--acid); color: var(--ink); }
+.environment-check-item strong, .environment-check-item small { display: block; }
+.environment-check-item small { margin-top: 4px; color: var(--muted); font-size: 12px; }
+.environment-check-item:focus-within { outline: 3px solid var(--blue); outline-offset: 4px; }
+.environment-confirm-note { margin: 16px 0 -12px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.full-button:disabled { opacity: .42; cursor: not-allowed; transform: none; box-shadow: none; }
+.pause-button { order: 4; padding: 8px 13px; border: 1px solid var(--line); border-radius: 99px; background: var(--card); color: var(--ink); cursor: pointer; font-size: 11px; font-weight: 750; transition: background .18s, color .18s, transform .18s; }
+.pause-button:hover { background: var(--ink); color: #fff; transform: translateY(-1px); }
+.pause-panel { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; background: var(--ink); color: #fff; }
+.pause-icon { display: block; margin-bottom: 10px; color: var(--acid); font-size: 42px; line-height: 1; }
+.pause-panel strong { font-size: 20px; }
+.pause-panel p { margin: 8px 0 18px; color: rgba(255,255,255,.7); font-size: 12px; }
+.pause-panel .button { font-size: 12px; }
+.pause-panel .button-primary { background: var(--acid); color: var(--ink); }
+.pause-panel .button-primary span { color: var(--ink); }
+.answer-help { margin: -2px 0 9px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+@media (max-width: 760px) {
+  .test-topbar { gap: 8px; }
+  .test-topbar .brand-lockup { font-size: 10px; letter-spacing: .1em; gap: 6px; }
+  .test-topbar .brand-dot { width: 10px; height: 10px; }
+  .pause-button { padding: 7px 9px; font-size: 9px; }
+  .test-progress-label strong { font-size: 9px; }
+  .test-progress-secondary { font-size: 8px; }
+  .answer-help { font-size: 10px; }
+}
+
+/* Phase 2A history and report reading states. */
+.historical-readonly { padding: 5px 9px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font-size: 10px; }
+.history-trend-section, .history-records-section { padding-top: 28px; }
+.history-records-section { margin-top: 42px; }
+.history-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.history-section-heading h2 { margin: 8px 0 0; font-size: clamp(23px, 3vw, 32px); letter-spacing: -.04em; }
+.history-section-heading h2 small { margin-left: 8px; color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: 0; }
+.trend-card { padding: 18px 18px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+.trend-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; }
+.trend-summary strong { color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
+.trend-chart { display: block; width: 100%; height: auto; margin-top: 14px; overflow: visible; }
+.trend-axis-line { stroke: rgba(23,25,29,.32); stroke-width: 1; }
+.trend-grid-line { stroke: rgba(23,25,29,.1); stroke-width: 1; stroke-dasharray: 3 5; }
+.trend-axis-text, .trend-axis-caption, .trend-date { fill: var(--muted); font-family: inherit; font-size: 10px; }
+.trend-axis-caption { font-size: 11px; }
+.trend-line { fill: none; stroke: var(--blue); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.trend-point { fill: var(--blue); stroke: var(--card); stroke-width: 2; }
+.trend-point-latest { fill: var(--coral); stroke: var(--ink); stroke-width: 2; }
+.trend-footnote { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.trend-empty { padding: 42px 24px; border: 1px dashed var(--line); color: var(--muted); font-size: 13px; line-height: 1.8; text-align: center; }
+.history-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 12px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.legend-comparable, .legend-record-only { width: 9px; height: 9px; display: inline-block; border-radius: 50%; }
+.legend-comparable { background: var(--blue); }
+.legend-record-only { background: #c5c7c1; }
+.history-card { padding: 0; }
+.history-card-open { display: block; width: 100%; padding: 20px 0; border: 0; border-bottom: 1px solid var(--soft-line); background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.history-card-open:hover .history-card-link, .history-card-open:focus-visible .history-card-link { color: var(--coral); }
+.history-card-open:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+.history-card-record-only .history-date, .history-card-record-only .history-metrics { opacity: .66; }
+.history-status { font-size: 9px; letter-spacing: .08em; font-weight: 800; color: #6e9b54; }
+.history-card-record-only .history-status { color: var(--muted); }
+.history-card-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; color: var(--muted); font-size: 11px; }
+.history-card-link { color: var(--ink); font-weight: 750; transition: color .15s; }
+.history-card-link span { margin-left: 5px; }
+@media (max-width: 760px) {
+  .history-header { padding-top: 42px; }
+  .history-section-heading { display: block; }
+  .history-section-heading h2 { margin-top: 7px; }
+  .trend-card { padding: 14px 10px 12px; }
+  .trend-axis-text { font-size: 9px; }
+  .trend-date { font-size: 9px; }
+  .trend-axis-caption { font-size: 10px; }
+  .history-card-footer { align-items: flex-start; flex-direction: column; gap: 7px; }
+}

@@ -1,9 +1,19 @@
+import { useState } from 'react'
+import { allEnvironmentChecksConfirmed, environmentChecks, type EnvironmentCheckId, type EnvironmentCheckState } from '../test/environment'
+
 interface EnvironmentCheckProps {
   onContinue: () => void
   onBack: () => void
 }
 
 export function EnvironmentCheck({ onContinue, onBack }: EnvironmentCheckProps) {
+  const [checks, setChecks] = useState<EnvironmentCheckState>({
+    'night-mode': false,
+    reflection: false,
+    'viewing-angle': false,
+    brightness: false,
+  })
+  const toggle = (id: EnvironmentCheckId) => setChecks((current) => ({ ...current, [id]: !current[id] }))
   return (
     <main className="page-shell narrow-page">
       <div className="topbar">
@@ -16,13 +26,14 @@ export function EnvironmentCheck({ onContinue, onBack }: EnvironmentCheckProps) 
         <h1>讓顏色先保持誠實。</h1>
         <p className="muted-copy">顯示條件會影響相對色差。用幾個簡單設定，讓這次結果更容易解讀。</p>
         <div className="environment-list">
-          <div className="environment-item"><span className="check-icon">✓</span><div><strong>調整至舒適且足夠的螢幕亮度</strong><span>避免亮度過低造成額外視覺負擔。</span></div></div>
-          <div className="environment-item"><span className="check-icon">✓</span><div><strong>避免強烈反光</strong><span>讓螢幕正面保持清楚、均勻的觀看角度。</span></div></div>
-          <div className="environment-item"><span className="check-icon">✓</span><div><strong>建議暫時關閉夜間／護眼色溫模式</strong><span>不要使用會主動改變色溫的顯示設定。</span></div></div>
-          <div className="environment-item"><span className="check-icon">✓</span><div><strong>想比較歷史結果，盡量使用相同裝置</strong><span>不同手機、面板與瀏覽器會產生不同的顯示條件。</span></div></div>
+          <label className={`environment-item environment-check-item${checks['night-mode'] ? ' is-checked' : ''}`}><input type="checkbox" checked={checks['night-mode']} onChange={() => toggle('night-mode')} /><span className="check-icon">✓</span><span><strong>已關閉 Night Shift／護眼色溫</strong><small>避免顯示設定主動改變色溫。</small></span></label>
+          <label className={`environment-item environment-check-item${checks.reflection ? ' is-checked' : ''}`}><input type="checkbox" checked={checks.reflection} onChange={() => toggle('reflection')} /><span className="check-icon">✓</span><span><strong>螢幕沒有明顯反光</strong><small>讓畫面保持清楚、均勻。</small></span></label>
+          <label className={`environment-item environment-check-item${checks['viewing-angle'] ? ' is-checked' : ''}`}><input type="checkbox" checked={checks['viewing-angle']} onChange={() => toggle('viewing-angle')} /><span className="check-icon">✓</span><span><strong>會以正面角度觀看</strong><small>避免視角影響顏色與亮度。</small></span></label>
+          <label className={`environment-item environment-check-item${checks.brightness ? ' is-checked' : ''}`}><input type="checkbox" checked={checks.brightness} onChange={() => toggle('brightness')} /><span className="check-icon">✓</span><span><strong>亮度足夠且觀看舒適</strong><small>避免過暗造成額外視覺負擔。</small></span></label>
         </div>
         <div className="privacy-note"><span>⌁</span><div><strong>本機保存，沒有帳號</strong><p>只記錄必要的非敏感技術資料與測驗結果，最多保存 20 次。</p></div></div>
-        <button className="button button-primary full-button" onClick={onContinue}>準備好了，開始測驗 <span>→</span></button>
+        <p className="environment-confirm-note">這只是你的環境確認，不代表螢幕已完成實體校正。</p>
+        <button className="button button-primary full-button" disabled={!allEnvironmentChecksConfirmed(checks)} onClick={onContinue}>我已確認以上條件，開始測驗 <span>→</span></button>
       </section>
     </main>
   )

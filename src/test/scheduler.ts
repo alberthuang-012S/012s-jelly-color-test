@@ -34,9 +34,10 @@ function snapshot(state: TestEngineState['tracks'][ColorDirectionId]): Staircase
   }
 }
 
-export function createEngineState(seed = Math.floor(Math.random() * 0x100000000)): TestEngineState {
+export function createEngineState(seed = Math.floor(Math.random() * 0x100000000), environmentConfirmed = false): TestEngineState {
   return {
     seed,
+    environmentConfirmed,
     phase: 'control',
     status: 'in-progress',
     controlIndex: 0,

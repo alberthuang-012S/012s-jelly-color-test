@@ -9,7 +9,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
     <main className="page-shell start-page">
       <div className="topbar">
         <div className="brand-lockup"><span className="brand-dot" /> JELLY COLOR TEST</div>
-        <span className="eyebrow">PHASE 1 · ADAPTIVE</span>
+        <span className="eyebrow">PHASE 2A · ADAPTIVE</span>
       </div>
       <section className="hero-grid">
         <div className="hero-copy">
@@ -23,7 +23,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
             <button className="button button-primary" onClick={onStart}>開始挑戰 <span>→</span></button>
             <button className="button button-quiet" onClick={onHistory}>查看歷史 {sessionCount > 0 ? `· ${sessionCount}` : ''}</button>
           </div>
-          <div className="micro-note"><span className="status-pulse" /> 通常 41–71 題，依校準與收斂狀況調整 · 不即時揭示答案</div>
+          <div className="micro-note"><span className="status-pulse" /> 測驗會依你的回答自動調整難度與長度 · 完整測量通常需要幾分鐘，建議一次完成</div>
         </div>
         <div className="hero-visual" aria-hidden="true">
           <div className="visual-ring ring-one" />

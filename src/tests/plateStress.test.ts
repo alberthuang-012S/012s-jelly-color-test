@@ -15,7 +15,28 @@ describe('plate generator stress', () => {
       if (!plate.validation.productionValid) rejected += 1
       expect(Number.isFinite(plate.actualNominalDeltaUv)).toBe(true)
       expect(plate.dots.every((dot) => Object.values(dot.color).every(Number.isFinite))).toBe(true)
+      expect(plate.validation.productionValid).toBe(true)
+      expect(plate.validation.maskCoverage).toBe(true)
+      expect(plate.validation.figureBackgroundDensity).toBe(true)
+      expect(plate.validation.nominalChromaticDistance).toBe(true)
+      expect(plate.validation.meanLuminanceDifference).toBe(true)
+      expect(plate.validation.luminanceDistributionOverlap).toBe(true)
+      expect(plate.validation.noInvalidRgbClipping).toBe(true)
+      expect(plate.regenerated).toBe(false)
     }
     expect(rejected).toBe(0)
+  })
+
+  it('rejects targets outside the supported 0–99 range instead of substituting them', () => {
+    for (const number of [-1, 100, 101, Number.NaN]) {
+      expect(() => generatePlate({ direction: 'A', requestedDistance: 0.042, number, seed: 7, phase: 'adaptive' })).toThrow('Unsupported target number')
+    }
+  })
+
+  it('is reproducible at the distance limits and an intermediate distance', () => {
+    for (const requestedDistance of [0.0035, 0.03125, 0.075]) {
+      const request = { direction: 'C' as const, requestedDistance, number: 42, seed: 90210, phase: 'adaptive' as const }
+      expect(generatePlate(request)).toEqual(generatePlate(request))
+    }
   })
 })

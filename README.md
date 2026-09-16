@@ -18,7 +18,7 @@ npm run audit
 npm run build
 ```
 
-The audit includes a 3,000-plate production validation stress test and 500-session virtual-observer simulations for thresholds 0.010, 0.020 and 0.040.
+The audit includes a 9,000-case production validation matrix (3 directions × 100 targets × 10 distances × 3 deterministic seeds) and 500-session virtual-observer simulations for thresholds 0.010, 0.020 and 0.040. See [`docs/measurement-engine-audit.md`](docs/measurement-engine-audit.md) for the recorded run.
 
 ## Measurement model
 
@@ -41,8 +41,8 @@ The audit includes a 3,000-plate production validation stress test and 500-sessi
 - Threshold fits use adaptive trials only, at least 10 observations, a converged increasing fit, and a 75% crossing inside the sampled range. Fallback requires four finite, in-range reversals. Failed calibration never yields a threshold; fewer than two usable directions never yield an overall value.
 - The reversal median is a separate approximate staircase summary, **not a validated 75% psychometric threshold**. Method labels are retained. No confidence interval or clinical equivalence is claimed.
 - CI monotonicity and fit are evaluated within directions. Fit quality is a descriptive, sampling-noise-adjusted binned calibration score, not a statistical goodness-of-fit test. Missing fit evidence scores zero. RQI completion uses calibration, trial coverage, reversals, threshold availability, and anchors rather than the completed flag alone.
-- Fresh sessions use different recorded seeds; explicit seeds reproduce simulations. Results record the engine version. The previous-session comparison excludes older versions and low-quality sessions.
-- The audit now covers the full 3 directions × 100 target numbers × 10 distances (including limits). Its open-response observer has no assumed 50% guessing floor, uses slope 4 on log-distance, and has 75% correct at the configured threshold. Three 500-session groups must each have ≥90% usable estimates, absolute median bias ≤25% of threshold, MAE ≤35%, and ≤71 trials. These are engineering regression gates, not clinical acceptance criteria. Real observers, lapse/guess behavior, display calibration, and repeatability still require empirical validation. The prior audit report applies only to uv2; the expanded target set needs its own audit run.
+- Fresh sessions use different recorded seeds; explicit seeds reproduce simulations. Results record the engine version. Comparison searches directly for the latest earlier session that passes the complete eligibility rule: same engine, usable RQI, and matching viewport, pixel ratio, browser context, color depth, gamut and color scheme. History keeps all records locally, while trends use only that comparable subset.
+- Phase 2A adds a required environment confirmation, an intentional pause that hides the plate and restarts the current trial clock on resume, player-facing phase/progress labels, and a read-first result summary. The audit now covers the full 3 directions × 100 target numbers × 10 distances (including limits) × 3 deterministic seeds. Its open-response observer has no assumed 50% guessing floor, uses slope 4 on log-distance, and has 75% correct at the configured threshold. Three 500-session groups must each have ≥90% usable estimates, absolute median bias ≤25% of threshold, MAE ≤35%, and ≤71 trials. These are engineering regression gates, not clinical acceptance criteria. Real observers, lapse/guess behavior, display calibration, and repeatability still require empirical validation. The prior audit report applies only to uv2 and is archived in the commit history, not represented as current-engine evidence.
 
 ## GitHub Pages
 

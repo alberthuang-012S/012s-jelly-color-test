@@ -9,6 +9,7 @@ import type { TestSession } from '../test/types'
 interface ResultsScreenProps {
   session: TestSession
   previousSession?: TestSession
+  isHistorical?: boolean
   onRestart: () => void
   onHistory: () => void
 }
@@ -17,11 +18,15 @@ function formatDcdt(value: number | undefined): string {
   return value === undefined || !Number.isFinite(value) ? '資料不足' : value.toFixed(4)
 }
 
-export function ResultsScreen({ session, previousSession, onRestart, onHistory }: ResultsScreenProps) {
+export function ResultsScreen({ session, previousSession, isHistorical = false, onRestart, onHistory }: ResultsScreenProps) {
   const [advanced, setAdvanced] = useState(false)
   const view = resultPresentation(session)
   const comparable = canCompareResults(session, previousSession)
   const sameDisplayedValue = comparable && formatDcdt(session.overallDcdt) === formatDcdt(previousSession.overallDcdt)
+  const thresholds = session.metrics?.directionalThresholds ?? session.directionalThresholds ?? []
+  const chromaticAccuracy = Number.isFinite(session.chromaticAccuracy) ? `${session.chromaticAccuracy.toFixed(1)}%` : '資料不足'
+  const consistencyIndex = Number.isFinite(session.consistencyIndex) ? session.consistencyIndex : '資料不足'
+  const qualityIndex = Number.isFinite(session.resultQualityIndex) ? session.resultQualityIndex : '資料不足'
   return (
     <main className="page-shell results-page readable-report">
       <div className="topbar results-topbar">
@@ -29,7 +34,7 @@ export function ResultsScreen({ session, previousSession, onRestart, onHistory }
         <button className="back-button" onClick={onHistory}>歷史紀錄 →</button>
       </div>
       <section className="report-intro" aria-labelledby="result-title">
-        <div className="report-intro-meta"><span className="section-kicker">本次測驗報告</span><span>已作答 {session.questions.length} 題</span></div>
+        <div className="report-intro-meta"><span className="section-kicker">本次色彩輪廓摘要</span>{isHistorical && <span className="historical-readonly">歷史報告 · 唯讀</span>}<span>已作答 {session.questions.length} 題</span></div>
         <h1 id="result-title">{view.title}</h1>
         <p>{view.summary}</p>
       </section>
@@ -52,7 +57,7 @@ export function ResultsScreen({ session, previousSession, onRestart, onHistory }
         </article>
       </section>
 
-      <DirectionProfile thresholds={session.metrics.directionalThresholds} usable={view.usable} />
+      <DirectionProfile thresholds={thresholds} usable={view.usable} />
       <section className="report-next" aria-labelledby="report-next-title">
         <div className="section-heading"><div><span className="section-kicker">接下來可以這樣做</span><h2 id="report-next-title">讓下一次結果更有參考價值</h2></div></div>
         <ul className="report-suggestions">{view.suggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}</ul>
@@ -72,9 +77,9 @@ export function ResultsScreen({ session, previousSession, onRestart, onHistory }
           <h2 className="report-detail-title">作答紀錄與測量數值</h2>
           <dl className="report-records">
             <div><dt>作答題數</dt><dd>{session.questions.length} 題</dd></div>
-            <div><dt>非檢查題正確率（CA）</dt><dd>{session.chromaticAccuracy.toFixed(1)}%</dd></div>
-            <div><dt>回答一致性（CI）</dt><dd>{session.consistencyIndex} / 100</dd></div>
-            <div><dt>資料品質（RQI）</dt><dd>{session.resultQualityIndex} / 100</dd></div>
+            <div><dt>非檢查題正確率（CA）</dt><dd>{chromaticAccuracy}</dd></div>
+            <div><dt>回答一致性（CI）</dt><dd>{consistencyIndex} / 100</dd></div>
+            <div><dt>資料品質（RQI）</dt><dd>{qualityIndex} / 100</dd></div>
             <div><dt>整體門檻（dCDT）</dt><dd>{formatDcdt(session.overallDcdt)}{Number.isFinite(session.overallDcdt) && ' nominal Δu′v′'}</dd></div>
             <div><dt>引擎版本</dt><dd>{session.engineVersion ?? '未記錄'}</dd></div>
           </dl>
@@ -82,15 +87,15 @@ export function ResultsScreen({ session, previousSession, onRestart, onHistory }
           <div className="report-table-wrap"><table className="report-method-table">
             <caption>各方向的估計依據</caption>
             <thead><tr><th scope="col">方向</th><th scope="col">門檻</th><th scope="col">方法</th><th scope="col">題數／反轉</th><th scope="col">收斂狀態</th></tr></thead>
-            <tbody>{session.metrics.directionalThresholds.map((item) => <tr key={item.directionId}>
+            <tbody>{thresholds.map((item) => <tr key={item.directionId}>
               <th scope="row">{item.label ?? item.directionId}</th><td>{formatDcdt(item.threshold)}</td>
               <td>{item.thresholdMethod === 'psychometric' ? '75% 曲線擬合' : item.thresholdMethod === 'reversal-fallback' ? '反轉點備援' : '資料不足'}</td>
               <td>{item.trialCount}／{item.reversalCount}</td><td>{item.insufficientCalibration ? '校準不足' : item.convergenceQuality === 'high' ? '達收斂條件' : '未達收斂條件'}</td>
             </tr>)}</tbody>
           </table></div>
-          <DifficultyCurve curve={session.metrics.difficultyCurve} />
-          <QualityPanel session={session} />
-          <ReportExplanation session={session} />
+          {session.metrics?.difficultyCurve && <DifficultyCurve curve={session.metrics.difficultyCurve} />}
+          {session.metrics?.quality && <QualityPanel session={session} />}
+          {session.metrics && <ReportExplanation session={session} />}
         </div>}
       </section>
       <p className="disclaimer">本結果描述本次螢幕條件下的相對表現，不作為醫療診斷。</p>

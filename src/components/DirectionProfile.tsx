@@ -13,8 +13,8 @@ export function DirectionProfile({ thresholds, usable = true }: DirectionProfile
   const unsettled = valid.some((item) => item.convergenceQuality !== 'high' || item.thresholdMethod !== 'psychometric')
   return (
     <section className="result-section report-directions" aria-labelledby="report-directions-title">
-      <div className="section-heading"><div><span className="section-kicker">看看不同顏色的表現</span><h2 id="report-directions-title">哪些色彩方向比較容易辨認？</h2></div></div>
-      <p className="direction-guide">{usable ? '線條越短，代表本次估計能辨認的色差越細微；只比較這次有資料的方向。' : '本次資料尚不適合比較方向差異，已有估計保留在詳細資料中。'}</p>
+      <div className="section-heading"><div><span className="section-kicker">看看不同顏色的表現</span><h2 id="report-directions-title">不同色彩方向的估計</h2></div></div>
+      <p className="direction-guide">{usable ? '線條越短，代表本次估計能辨認的色差越細微；只閱讀這次有資料的方向。' : '本次資料尚不適合比較方向差異，已有估計保留在詳細資料中。'}</p>
       <div className="direction-list">
         {thresholds.map((item) => {
           const available = hasThreshold(item)

@@ -172,6 +172,7 @@ export interface SessionMetrics {
 
 export interface TestEngineState {
   seed: number
+  environmentConfirmed?: boolean
   phase: TestPhase
   status: 'in-progress' | 'complete' | 'partial'
   controlIndex: number
@@ -191,6 +192,7 @@ export interface TestEngineState {
 
 export interface TestSession {
   engineVersion?: string
+  environmentConfirmed?: boolean
   id: string
   startedAt: string
   completedAt?: string

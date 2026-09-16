@@ -1,7 +1,9 @@
 import { generatePlate } from '../plate/generator'
 import { buildTestSession } from '../test/session'
+import { resultPresentation } from '../test/report'
 import { createEngineState, recordTrial, selectNextTrial } from '../test/scheduler'
 import { seededRandom } from '../plate/rng'
+import { DIRECTION_ORDER } from '../psychophysics/config'
 
 export interface SimulationConfig {
   threshold: number
@@ -17,8 +19,22 @@ export interface SimulationResult {
   sessions: number
   validSessions: number
   averageTrialCount: number
+  medianTrialCount: number
   minTrialCount: number
   maxTrialCount: number
+  usableSessions: number
+  usableRate: number
+  convergedSessions: number
+  convergenceRate: number
+  lowConvergenceSessions: number
+  lowConvergenceRate: number
+  psychometricFitCount: number
+  psychometricFitUsageRate: number
+  reversalFallbackCount: number
+  reversalFallbackUsageRate: number
+  directionalEstimateCount: number
+  failedCalibrationSessions: number
+  failedCalibrationRate: number
 }
 
 function median(values: number[]): number {
@@ -30,6 +46,13 @@ function median(values: number[]): number {
 export function runVirtualObserverSimulation(config: SimulationConfig): SimulationResult {
   const estimates: number[] = []
   const trialCounts: number[] = []
+  let usableSessions = 0
+  let convergedSessions = 0
+  let lowConvergenceSessions = 0
+  let psychometricFitCount = 0
+  let reversalFallbackCount = 0
+  let directionalEstimateCount = 0
+  let failedCalibrationSessions = 0
   for (let sessionIndex = 0; sessionIndex < config.sessions; sessionIndex += 1) {
     const random = seededRandom(config.seed + sessionIndex * 131)
     let state = createEngineState(config.seed + sessionIndex * 131)
@@ -64,6 +87,16 @@ export function runVirtualObserverSimulation(config: SimulationConfig): Simulati
     if (session.overallDcdt !== undefined && session.metrics.directionalThresholds.filter((item) => item.threshold !== undefined).length >= 2) {
       estimates.push(session.overallDcdt)
     }
+    const thresholds = session.metrics.directionalThresholds
+    const available = thresholds.filter((item) => item.threshold !== undefined && !item.insufficientCalibration)
+    const failedCalibration = DIRECTION_ORDER.some((directionId) => session.metrics.directionalThresholds.find((item) => item.directionId === directionId)?.insufficientCalibration)
+    if (resultPresentation(session).usable) usableSessions += 1
+    if (available.length > 0 && available.every((item) => item.convergenceQuality === 'high')) convergedSessions += 1
+    if (available.some((item) => item.convergenceQuality === 'low') || failedCalibration) lowConvergenceSessions += 1
+    if (failedCalibration) failedCalibrationSessions += 1
+    directionalEstimateCount += available.length
+    psychometricFitCount += available.filter((item) => item.thresholdMethod === 'psychometric').length
+    reversalFallbackCount += available.filter((item) => item.thresholdMethod === 'reversal-fallback').length
   }
   const estimatedMedian = estimates.length ? median(estimates) : Number.NaN
   const absoluteErrors = estimates.map((estimate) => Math.abs(estimate - config.threshold))
@@ -76,8 +109,22 @@ export function runVirtualObserverSimulation(config: SimulationConfig): Simulati
     sessions: config.sessions,
     validSessions: estimates.length,
     averageTrialCount: trialCounts.length ? trialCounts.reduce((sum, value) => sum + value, 0) / trialCounts.length : Number.NaN,
+    medianTrialCount: trialCounts.length ? median(trialCounts) : Number.NaN,
     minTrialCount: trialCounts.length ? Math.min(...trialCounts) : 0,
     maxTrialCount: trialCounts.length ? Math.max(...trialCounts) : 0,
+    usableSessions,
+    usableRate: usableSessions / config.sessions,
+    convergedSessions,
+    convergenceRate: convergedSessions / config.sessions,
+    lowConvergenceSessions,
+    lowConvergenceRate: lowConvergenceSessions / config.sessions,
+    psychometricFitCount,
+    psychometricFitUsageRate: directionalEstimateCount ? psychometricFitCount / directionalEstimateCount : 0,
+    reversalFallbackCount,
+    reversalFallbackUsageRate: directionalEstimateCount ? reversalFallbackCount / directionalEstimateCount : 0,
+    directionalEstimateCount,
+    failedCalibrationSessions,
+    failedCalibrationRate: failedCalibrationSessions / config.sessions,
   }
 }
 
