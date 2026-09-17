@@ -1,55 +1,185 @@
 import { seededRandom } from './rng'
 import type { PlateDot } from '../test/types'
 
-const GLYPHS: Record<string, string[]> = {
-  '0': ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
-  '3': ['11110', '00011', '00011', '01110', '00011', '00011', '11110'],
-  '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
-  '6': ['01110', '11000', '11000', '11110', '11011', '11011', '01110'],
-  '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
-  '2': ['01110', '11011', '00011', '00110', '01100', '11000', '11111'],
-  '4': ['00110', '01110', '11010', '11010', '11111', '00010', '00111'],
-  '5': ['11111', '11000', '11110', '00011', '00011', '11011', '01110'],
-  '7': ['11111', '00011', '00110', '01100', '01100', '01100', '01100'],
-  '9': ['01110', '11011', '11011', '01111', '00011', '00011', '01110'],
+interface Point {
+  x: number
+  y: number
+}
+
+interface Stroke {
+  points: Point[]
+  closed?: boolean
+}
+
+const PLATE_CENTER = 0.5
+const PLATE_RADIUS = 0.43
+const TARGET_DOT_MIN = 460
+const TARGET_DOT_SPAN = 61
+const DOT_EDGE_MARGIN = 0.006
+const MIN_DOT_GAP = 0.0015
+const MIN_DOT_RADIUS = 0.008
+const MAX_DOT_RADIUS = 0.0176
+const MASK_HEIGHT = 0.56
+const MASK_TOP = 0.22
+const GLYPH_MASK_SIZE = 128
+const GLYPH_STROKE_RADIUS = 0.12
+const PLACEMENT_RADIUS = PLATE_RADIUS - DOT_EDGE_MARGIN - MAX_DOT_RADIUS - MIN_DOT_GAP
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
+const ANGLE_JITTER = 0.035
+const RADIAL_JITTER = 0.0015
+
+function path(...points: Point[]): Stroke {
+  return { points }
+}
+
+function loop(...points: Point[]): Stroke {
+  return { points, closed: true }
+}
+
+function ellipse(cx: number, cy: number, rx: number, ry: number, steps = 28): Stroke {
+  return loop(...Array.from({ length: steps }, (_, index) => {
+    const angle = (index / steps) * Math.PI * 2
+    return { x: cx + Math.cos(angle) * rx, y: cy + Math.sin(angle) * ry }
+  }))
+}
+
+/**
+ * Smooth, vector-like number strokes in a unit-height cell. These paths are
+ * sampled into a high-resolution mask, so the figure dots inherit a rounded,
+ * organic boundary without a coarse 5 × 7 bitmap grid.
+ */
+const GLYPHS: Record<string, Stroke[]> = {
+  '0': [ellipse(0.5, 0.5, 0.3, 0.41)],
+  '1': [
+    path({ x: 0.3, y: 0.24 }, { x: 0.48, y: 0.1 }, { x: 0.53, y: 0.1 }, { x: 0.53, y: 0.9 }),
+    path({ x: 0.28, y: 0.9 }, { x: 0.77, y: 0.9 }),
+  ],
+  '2': [path(
+    { x: 0.2, y: 0.25 }, { x: 0.28, y: 0.13 }, { x: 0.48, y: 0.1 }, { x: 0.68, y: 0.15 },
+    { x: 0.77, y: 0.27 }, { x: 0.72, y: 0.4 }, { x: 0.23, y: 0.9 }, { x: 0.78, y: 0.9 },
+  )],
+  '3': [path(
+    { x: 0.2, y: 0.19 }, { x: 0.32, y: 0.11 }, { x: 0.58, y: 0.1 }, { x: 0.73, y: 0.18 },
+    { x: 0.76, y: 0.3 }, { x: 0.71, y: 0.4 }, { x: 0.54, y: 0.49 }, { x: 0.68, y: 0.55 },
+    { x: 0.77, y: 0.66 }, { x: 0.73, y: 0.82 }, { x: 0.58, y: 0.9 }, { x: 0.31, y: 0.88 },
+    { x: 0.2, y: 0.8 },
+  )],
+  '4': [
+    path({ x: 0.63, y: 0.1 }, { x: 0.2, y: 0.59 }, { x: 0.78, y: 0.59 }),
+    path({ x: 0.63, y: 0.1 }, { x: 0.63, y: 0.9 }),
+  ],
+  '5': [path(
+    { x: 0.76, y: 0.1 }, { x: 0.26, y: 0.1 }, { x: 0.23, y: 0.47 }, { x: 0.58, y: 0.47 },
+    { x: 0.73, y: 0.55 }, { x: 0.75, y: 0.72 }, { x: 0.65, y: 0.86 }, { x: 0.47, y: 0.91 },
+    { x: 0.28, y: 0.84 }, { x: 0.21, y: 0.76 },
+  )],
+  '6': [path(
+    { x: 0.71, y: 0.13 }, { x: 0.51, y: 0.1 }, { x: 0.33, y: 0.16 }, { x: 0.23, y: 0.34 },
+    { x: 0.22, y: 0.7 }, { x: 0.32, y: 0.86 }, { x: 0.51, y: 0.9 }, { x: 0.69, y: 0.83 },
+    { x: 0.75, y: 0.68 }, { x: 0.69, y: 0.55 }, { x: 0.52, y: 0.49 }, { x: 0.22, y: 0.55 },
+  )],
+  '7': [path({ x: 0.2, y: 0.1 }, { x: 0.79, y: 0.1 }, { x: 0.43, y: 0.9 })],
+  '8': [ellipse(0.5, 0.29, 0.27, 0.2), ellipse(0.5, 0.71, 0.29, 0.21)],
+  '9': [
+    ellipse(0.49, 0.29, 0.27, 0.2),
+    path({ x: 0.76, y: 0.4 }, { x: 0.72, y: 0.69 }, { x: 0.6, y: 0.86 }, { x: 0.4, y: 0.9 }),
+  ],
 }
 
 function glyphForNumber(number: number): string[] {
   if (!Number.isInteger(number) || number < 0 || number > 99) throw new Error('Unsupported target number')
-  return String(number)
-    .split('')
-    .map((digit) => GLYPHS[digit])
-    .reduce<string[]>((rows, glyph, index, glyphs) => {
-      if (!rows.length) return [...glyph]
-      return rows.map((row, rowIndex) => `${row}0${glyph[rowIndex]}`)
-    }, [])
+  return String(number).split('')
 }
 
-export function buildDotLayout(
-  number: number,
-  seed: number,
-  columns = 30,
-  rows = 18,
-): PlateDot[] {
-  const random = seededRandom(seed)
-  const glyph = glyphForNumber(number)
-  const glyphWidth = glyph[0].length
-  // The canvas is 5:3. Use square physical glyph cells, independent of digit count.
-  const cellHeight = 0.88 / 7
-  const cellWidth = cellHeight / (5 / 3)
-  const left = (1 - glyphWidth * cellWidth) / 2
-  const top = (1 - 7 * cellHeight) / 2
-  const dots: PlateDot[] = []
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const glyphRow = Math.floor(((row + 0.5) / rows - top) / cellHeight)
-      const glyphColumn = Math.floor(((column + 0.5) / columns - left) / cellWidth)
-      const isFigure = glyphRow >= 0 && glyphRow < 7 && glyphColumn >= 0 && glyphColumn < glyphWidth && glyph[glyphRow][glyphColumn] === '1'
-      const x = (column + 0.5 + (random() - 0.5) * 0.55) / columns
-      const y = (row + 0.5 + (random() - 0.5) * 0.55) / rows
-      const radius = 0.010 + random() * 0.004
-      dots.push({ x, y, radius, isFigure, color: { r: 0, g: 0, b: 0 } })
+function distanceSquaredToSegment(point: Point, start: Point, end: Point): number {
+  const dx = end.x - start.x
+  const dy = end.y - start.y
+  const lengthSquared = dx * dx + dy * dy
+  if (lengthSquared === 0) return (point.x - start.x) ** 2 + (point.y - start.y) ** 2
+  const projection = Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared))
+  const nearestX = start.x + projection * dx
+  const nearestY = start.y + projection * dy
+  return (point.x - nearestX) ** 2 + (point.y - nearestY) ** 2
+}
+
+function pointIsInsideStroke(point: Point, stroke: Stroke, strokeRadius: number): boolean {
+  const segments = stroke.points.length - 1 + (stroke.closed ? 1 : 0)
+  for (let index = 0; index < segments; index += 1) {
+    const start = stroke.points[index]
+    const end = stroke.points[(index + 1) % stroke.points.length]
+    if (distanceSquaredToSegment(point, start, end) <= strokeRadius * strokeRadius) return true
+  }
+  return false
+}
+
+function createGlyphMask(strokes: Stroke[]): Uint8Array {
+  const mask = new Uint8Array(GLYPH_MASK_SIZE * GLYPH_MASK_SIZE)
+  for (let row = 0; row < GLYPH_MASK_SIZE; row += 1) {
+    for (let column = 0; column < GLYPH_MASK_SIZE; column += 1) {
+      const point = {
+        x: (column + 0.5) / GLYPH_MASK_SIZE,
+        y: (row + 0.5) / GLYPH_MASK_SIZE,
+      }
+      if (strokes.some((stroke) => pointIsInsideStroke(point, stroke, GLYPH_STROKE_RADIUS))) {
+        mask[row * GLYPH_MASK_SIZE + column] = 1
+      }
     }
+  }
+  return mask
+}
+
+const GLYPH_MASKS: Record<string, Uint8Array> = Object.fromEntries(
+  Object.entries(GLYPHS).map(([digit, strokes]) => [digit, createGlyphMask(strokes)]),
+) as Record<string, Uint8Array>
+
+function pointIsInNumberMask(digitMasks: Uint8Array[], x: number, y: number): boolean {
+  const digitCellWidth = digitMasks.length === 1 ? 0.3 : 0.32
+  const digitGap = digitMasks.length === 1 ? 0 : 0.04
+  const totalWidth = digitCellWidth * digitMasks.length + digitGap * Math.max(0, digitMasks.length - 1)
+  const groupLeft = PLATE_CENTER - totalWidth / 2
+  const localY = (y - MASK_TOP) / MASK_HEIGHT
+  if (localY < 0 || localY > 1) return false
+  const maskRow = Math.min(GLYPH_MASK_SIZE - 1, Math.floor(localY * GLYPH_MASK_SIZE))
+
+  for (let index = 0; index < digitMasks.length; index += 1) {
+    const localX = (x - (groupLeft + index * (digitCellWidth + digitGap))) / digitCellWidth
+    if (localX < 0 || localX > 1) continue
+    const maskColumn = Math.min(GLYPH_MASK_SIZE - 1, Math.floor(localX * GLYPH_MASK_SIZE))
+    if (digitMasks[index][maskRow * GLYPH_MASK_SIZE + maskColumn] === 1) return true
+  }
+  return false
+}
+
+/**
+ * Creates an Ishihara-like point field without a placement grid. A sunflower
+ * sequence gives the disk a blue-noise-like baseline; seeded angular and
+ * radial perturbations keep the spacing organic while remaining inexpensive to
+ * generate for simulation and production stress tests.
+ */
+export function buildDotLayout(number: number, seed: number): PlateDot[] {
+  const random = seededRandom(seed)
+  const targetCount = TARGET_DOT_MIN + Math.floor(random() * TARGET_DOT_SPAN)
+  const dots: PlateDot[] = []
+  const digits = glyphForNumber(number)
+  const digitMasks = digits.map((digit) => GLYPH_MASKS[digit])
+  const angleOffset = random() * Math.PI * 2
+
+  for (let index = 0; index < targetCount; index += 1) {
+    const radius = MIN_DOT_RADIUS + Math.pow(random(), 1.15) * (MAX_DOT_RADIUS - MIN_DOT_RADIUS)
+    const normalizedRadius = (index + 0.5) / targetCount
+    const radiusJitter = (random() - 0.5) * RADIAL_JITTER
+    const distance = Math.min(PLACEMENT_RADIUS, Math.max(0, Math.sqrt(normalizedRadius) * PLACEMENT_RADIUS + radiusJitter))
+    const angle = angleOffset + index * GOLDEN_ANGLE + (random() - 0.5) * ANGLE_JITTER
+    const x = PLATE_CENTER + Math.cos(angle) * distance
+    const y = PLATE_CENTER + Math.sin(angle) * distance
+    const dot: PlateDot = {
+      x,
+      y,
+      radius,
+      isFigure: pointIsInNumberMask(digitMasks, x, y),
+      color: { r: 0, g: 0, b: 0 },
+    }
+    dots.push(dot)
   }
   return dots
 }

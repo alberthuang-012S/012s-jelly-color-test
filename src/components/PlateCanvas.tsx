@@ -12,12 +12,18 @@ export function PlateCanvas({ plate }: PlateCanvasProps) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const width = 900
-    const height = 540
+    const width = 720
+    const height = 720
     const context = canvas.getContext('2d')
     if (!context) return
     canvas.width = width
     canvas.height = height
+    context.fillStyle = '#f7f6f2'
+    context.fillRect(0, 0, width, height)
+    context.save()
+    context.beginPath()
+    context.arc(width / 2, height / 2, width * 0.43, 0, Math.PI * 2)
+    context.clip()
     context.fillStyle = rgbText(plate.backgroundColor)
     context.fillRect(0, 0, width, height)
     plate.dots.forEach((dot) => {
@@ -26,6 +32,7 @@ export function PlateCanvas({ plate }: PlateCanvasProps) {
       context.arc(dot.x * width, dot.y * height, dot.radius * width, 0, Math.PI * 2)
       context.fill()
     })
+    context.restore()
   }, [plate])
 
   return <canvas ref={canvasRef} className="plate-canvas" role="img" aria-label="Hidden Number 色彩圓點題板" />

@@ -25,6 +25,6 @@ it('centers single digits without stretching them to the two-digit width', () =>
   expect(single.right - single.left).toBeLessThan((double.right - double.left) * 0.55)
   expect(single.bottom - single.top).toBeCloseTo(double.bottom - double.top, 1)
   expect((single.left + single.right) / 2).toBeCloseTo(0.5, 1)
-  expect((single.right - single.left) * (5 / 3) / (single.bottom - single.top)).toBeGreaterThan(0.5)
-  expect((single.right - single.left) * (5 / 3) / (single.bottom - single.top)).toBeLessThan(0.9)
+  expect((single.right - single.left) / (single.bottom - single.top)).toBeGreaterThan(0.3)
+  expect((single.right - single.left) / (single.bottom - single.top)).toBeLessThan(0.7)
 })

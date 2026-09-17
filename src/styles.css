@@ -161,7 +161,7 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .test-instruction h1 { margin-bottom: 7px; font-size: clamp(28px, 4vw, 48px); letter-spacing: -.06em; }
 .test-instruction p { color: var(--muted); font-size: 13px; }
 .plate-frame { padding: 10px; background: var(--card); border: 1px solid var(--line); box-shadow: 10px 10px 0 rgba(108,152,255,.13); }
-.plate-canvas { display: block; width: 100%; height: auto; aspect-ratio: 5 / 3; }
+.plate-canvas { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; }
 .answer-area { max-width: 620px; margin: 34px auto 0; text-align: center; }
 .answer-label { margin-bottom: 14px; font-size: 11px; letter-spacing: .14em; font-weight: 800; color: var(--muted); }
 .answer-entry { max-width: 360px; margin: 0 auto; }
