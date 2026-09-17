@@ -55,6 +55,13 @@ describe('history comparison and trend selection', () => {
     expect(selectHistorySession([newest, older], 'older')).toBe(older)
   })
 
+  it('keeps supplemental direction records out of the core dCDT trend', () => {
+    const core = makeSession('core', '2026-09-10T10:00:00.000Z')
+    const supplemental = makeSession('supplemental', '2026-09-09T10:00:00.000Z', { testMode: 'supplemental' })
+    expect(buildHistoryTrend([supplemental, core]).sessions.map((session) => session.id)).toEqual(['core'])
+    expect(latestComparablePrevious(supplemental, [core])).toBeUndefined()
+  })
+
   it('replaces a saved session with the same id instead of creating a duplicate', () => {
     localStorage.clear()
     const first = makeSession('same-id', '2026-09-10T10:00:00.000Z')

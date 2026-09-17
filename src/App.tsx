@@ -10,7 +10,7 @@ import { latestComparablePrevious } from './test/history'
 import { buildTestSession, readDeviceInfo } from './test/session'
 import { createEngineState, recordTrial, selectNextTrial } from './test/scheduler'
 import { pauseTrial, responseTimeMs as trialResponseTimeMs, resumeTrial, startTrial, type TrialClock } from './test/trialClock'
-import type { TestEngineState, TestSession } from './test/types'
+import type { ColorDirectionId, TestEngineState, TestSession } from './test/types'
 
 type Screen = 'start' | 'environment' | 'test' | 'results' | 'history'
 
@@ -72,7 +72,20 @@ function App() {
     setStartedAt(new Date().toISOString())
     setViewedSession(null)
     setPaused(false)
-    setEngine(createEngineState(undefined, true))
+    setSession(null)
+    setEngine(createEngineState(undefined, true, 'core'))
+    setScreen('test')
+  }
+
+  const beginSupplemental = (directions: ColorDirectionId[]) => {
+    const selected = [...new Set(directions)]
+    if (!selected.length) return
+    setStartedAt(new Date().toISOString())
+    setViewedSession(null)
+    setPaused(false)
+    const parentSessionId = session?.testMode === 'core' ? session.id : undefined
+    setSession(null)
+    setEngine(createEngineState(undefined, true, 'supplemental', selected, parentSessionId))
     setScreen('test')
   }
 
@@ -115,7 +128,7 @@ function App() {
   if (screen === 'environment') return <EnvironmentCheck onContinue={begin} onBack={() => setScreen('start')} />
   if (screen === 'test' && generated.error) return <main className="page-shell"><h1>題板未通過品質檢查</h1><p>已停止測量，本次未產生分數。請重新開始。</p><button className="button button-primary" onClick={restart}>重新開始</button></main>
   if (screen === 'test' && engine && spec && plate) return <TestScreen engine={engine} spec={spec} plate={plate} paused={paused} onPause={() => setPaused(true)} onResume={() => setPaused(false)} onAnswer={answer} />
-  if (screen === 'results' && reportSession) return <ResultsScreen session={reportSession} previousSession={reportPrevious} isHistorical={Boolean(viewedSession)} onRestart={restart} onHistory={showHistory} />
+  if (screen === 'results' && reportSession) return <ResultsScreen session={reportSession} previousSession={reportPrevious} isHistorical={Boolean(viewedSession)} onRestart={restart} onHistory={showHistory} onStartSupplemental={beginSupplemental} />
   if (screen === 'history') return <HistoryScreen sessions={history} onBack={() => setScreen(session ? 'results' : 'start')} onStart={restart} onOpenSession={openHistorySession} />
   return <StartScreen onStart={() => setScreen('environment')} onHistory={() => setScreen('history')} sessionCount={history.length} />
 }

@@ -1,8 +1,11 @@
 import type { ColorDirectionId } from '../test/types'
 
-// A/B are retained for reading legacy sessions. New sessions use RG as one
-// bipolar red-green axis, plus three complementary display-relative axes.
-export const DIRECTION_ORDER: ColorDirectionId[] = ['RG', 'C', 'D', 'E']
+// A/B are retained for reading legacy sessions. The quick professional
+// session uses the bipolar red-green axis and blue-yellow axis. The remaining
+// display-relative axes are available as optional follow-up measurements.
+export const DIRECTION_ORDER: ColorDirectionId[] = ['RG', 'C']
+export const OPTIONAL_DIRECTION_ORDER: ColorDirectionId[] = ['D', 'E']
+export const ALL_DIRECTION_ORDER: ColorDirectionId[] = [...DIRECTION_ORDER, ...OPTIONAL_DIRECTION_ORDER]
 
 export const DIRECTION_LABELS: Record<ColorDirectionId, string> = {
   A: '紅－綠方向',

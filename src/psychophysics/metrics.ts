@@ -52,7 +52,7 @@ function contrastBands(questions: QuestionResult[]): DifficultyCurve['bands'] {
   })
 }
 
-function buildDifficultyCurve(questions: QuestionResult[]): DifficultyCurve {
+function buildDifficultyCurve(questions: QuestionResult[], directionOrder: ColorDirectionId[]): DifficultyCurve {
   const valid = questions.filter((question) => question.phase !== 'control' && question.nominalDeltaUv !== undefined)
   const grouped = new Map<string, { distance: number; correct: number; count: number }>()
   valid.forEach((question) => {
@@ -68,10 +68,10 @@ function buildDifficultyCurve(questions: QuestionResult[]): DifficultyCurve {
     .map((point) => ({ distance: point.distance, probability: point.correct / point.count, count: point.count }))
   // A pooled curve is descriptive only: fit each direction separately, then
   // average probabilities. Do not infer an overall 75% threshold from pooling.
-  const fits = DIRECTION_ORDER.map((direction) => fitPsychometricCurve(valid.filter((question) => question.phase === 'adaptive' && question.directionId === direction).map((question) => ({ distance: question.nominalDeltaUv as number, correct: question.correct })))).filter((fit) => fit?.converged)
+  const fits = directionOrder.map((direction) => fitPsychometricCurve(valid.filter((question) => question.phase === 'adaptive' && question.directionId === direction).map((question) => ({ distance: question.nominalDeltaUv as number, correct: question.correct })))).filter((fit) => fit?.converged)
   const min = Math.min(...valid.map((question) => question.nominalDeltaUv as number), 0.004)
   const max = Math.max(...valid.map((question) => question.nominalDeltaUv as number), 0.06)
-  const curve = fits.length === DIRECTION_ORDER.length
+  const curve = fits.length === directionOrder.length
     ? Array.from({ length: 32 }, (_, index) => {
         const distance = min + ((max - min) * index) / 31
         return { distance, probability: fits.reduce((sum, fit) => sum + fit!.predict(distance), 0) / fits.length }
@@ -81,14 +81,15 @@ function buildDifficultyCurve(questions: QuestionResult[]): DifficultyCurve {
 }
 
 export function calculateAllMetrics(engine: TestEngineState): SessionMetrics {
-  const directionalThresholds: DirectionThreshold[] = DIRECTION_ORDER.map((directionId) =>
+  const directionOrder = engine.directionOrder ?? DIRECTION_ORDER
+  const directionalThresholds: DirectionThreshold[] = directionOrder.map((directionId) =>
     estimateThreshold(directionId, engine.questions, engine.tracks[directionId]),
   ).map((threshold) => ({ ...threshold, label: DIRECTION_LABELS[threshold.directionId] }))
   const overallDcdt = overallThreshold(directionalThresholds)
-  const consistency = calculateConsistencyIndex(engine.questions)
+  const consistency = calculateConsistencyIndex(engine.questions, directionOrder)
   const quality = calculateResultQualityIndex(engine.questions, consistency.score, engine)
   const directionAccuracyByDirection = Object.fromEntries(
-    DIRECTION_ORDER.map((directionId) => [directionId, directionAccuracy(engine.questions, directionId)]),
+    directionOrder.map((directionId) => [directionId, directionAccuracy(engine.questions, directionId)]),
   ) as Record<ColorDirectionId, number>
   return {
     directionalThresholds,
@@ -97,6 +98,6 @@ export function calculateAllMetrics(engine: TestEngineState): SessionMetrics {
     directionAccuracy: directionAccuracyByDirection,
     consistency,
     quality,
-    difficultyCurve: buildDifficultyCurve(engine.questions),
+    difficultyCurve: buildDifficultyCurve(engine.questions, directionOrder),
   }
 }

@@ -1,6 +1,7 @@
 export type ColorDirectionId = 'A' | 'B' | 'C' | 'D' | 'E' | 'RG'
 export type ColorPolarityId = 'A' | 'B'
 export type TestPhase = 'control' | 'calibration' | 'adaptive' | 'anchor'
+export type TestMode = 'core' | 'supplemental'
 export type ThresholdMethod = 'psychometric' | 'reversal-fallback'
 
 export interface StaircaseState {
@@ -175,6 +176,9 @@ export interface SessionMetrics {
 
 export interface TestEngineState {
   seed: number
+  mode: TestMode
+  directionOrder: ColorDirectionId[]
+  parentSessionId?: string
   environmentConfirmed?: boolean
   phase: TestPhase
   status: 'in-progress' | 'complete' | 'partial'
@@ -195,6 +199,9 @@ export interface TestEngineState {
 
 export interface TestSession {
   engineVersion?: string
+  testMode?: TestMode
+  directionOrder?: ColorDirectionId[]
+  parentSessionId?: string
   environmentConfirmed?: boolean
   id: string
   startedAt: string

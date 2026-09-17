@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { generatePlate } from '../plate/generator'
 import { generatePalette } from '../plate/palettes'
-import { DIRECTION_ORDER } from '../psychophysics/config'
+import { ALL_DIRECTION_ORDER } from '../psychophysics/config'
 
 describe('plate generator stress', () => {
   it('generates 3000 valid seeded production plates without NaN or crashes', () => {
     let rejected = 0
     for (let index = 0; index < 3000; index += 1) {
       const plate = generatePlate({
-        direction: DIRECTION_ORDER[index % DIRECTION_ORDER.length],
+        direction: ALL_DIRECTION_ORDER[index % ALL_DIRECTION_ORDER.length],
         requestedDistance: 0.0035 + (Math.floor(index / 300) % 10) * (0.075 - 0.0035) / 9,
-        number: Math.floor(index / DIRECTION_ORDER.length) % 100,
+        number: Math.floor(index / ALL_DIRECTION_ORDER.length) % 100,
         seed: 1000 + index,
         phase: 'adaptive',
       })

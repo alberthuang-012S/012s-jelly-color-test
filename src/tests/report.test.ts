@@ -46,6 +46,22 @@ describe('report interpretation', () => {
     session.questions = []
     expect(resultPresentation(session).stabilityLabel).toBe('資料不足')
   })
+
+  it('keeps a one-direction supplemental result usable without inventing an overall dCDT', () => {
+    const session = buildTestSession(createEngineState(2, true, 'supplemental', ['D']), new Date(0).toISOString(), readDeviceInfo())
+    session.status = 'complete'
+    session.resultQualityIndex = 90
+    session.consistencyIndex = 88
+    session.questions = Array.from({ length: 18 }, (_, index) => question({ id: `supplemental-${index}`, directionId: 'D' }))
+    session.metrics.directionalThresholds = [{ directionId: 'D', threshold: 0.02, thresholdMethod: 'psychometric', trialCount: 18, reversalCount: 7, convergenceQuality: 'high' }]
+    session.overallDcdt = undefined
+    const view = resultPresentation(session)
+    expect(view.usable).toBe(true)
+    expect(view.hasOverall).toBe(false)
+    expect(view.isSupplemental).toBe(true)
+    expect(canCompareResults(session, reportFixture())).toBe(false)
+  })
+
   it('compares only eligible different sessions with matching versions and recorded devices', () => {
     const current = reportFixture()
     const previous = { ...reportFixture(), id: 'previous' }

@@ -15,7 +15,13 @@ function normalizeSession(value: unknown): TestSession | undefined {
   const rawQuality = typeof value.resultQualityIndex === 'number' ? value.resultQualityIndex : typeof quality?.score === 'number' ? quality.score : 0
   const rawQuestions = value.questions as TestSession['questions']
   const directionals = Array.isArray(value.directionalThresholds) ? value.directionalThresholds : metrics && Array.isArray(metrics.directionalThresholds) ? metrics.directionalThresholds : []
-  const normalized = { ...value, questions: rawQuestions, directionalThresholds: directionals, resultQualityIndex: rawQuality } as TestSession
+  const normalized = {
+    ...value,
+    testMode: value.testMode === 'supplemental' ? 'supplemental' : 'core',
+    questions: rawQuestions,
+    directionalThresholds: directionals,
+    resultQualityIndex: rawQuality,
+  } as TestSession
   return normalized
 }
 

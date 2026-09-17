@@ -1,14 +1,17 @@
-import { adaptiveConfig, DIRECTION_ORDER } from '../src/psychophysics/config'
+import { adaptiveConfig, ALL_DIRECTION_ORDER } from '../src/psychophysics/config'
 import { generatePlate } from '../src/plate/generator'
 import { runAllSimulationGroups } from '../src/tests/simulation'
 import { createEngineState, questionCountEstimate } from '../src/test/scheduler'
 
-const directions = [...DIRECTION_ORDER]
+const directions = [...ALL_DIRECTION_ORDER]
 const targetNumbers = Array.from({ length: 100 }, (_, number) => number)
 const distances = Array.from({ length: 10 }, (_, index) => adaptiveConfig.minDistance + index * (adaptiveConfig.maxDistance - adaptiveConfig.minDistance) / 9)
 const seeds = [1000, 2000, 3000]
 const totalCases = directions.length * targetNumbers.length * distances.length * seeds.length
-const maximumQuestionCount = questionCountEstimate(createEngineState(1)).maximumTotal
+const coreQuestionRange = questionCountEstimate(createEngineState(1))
+const supplementalOneQuestionRange = questionCountEstimate(createEngineState(1, true, 'supplemental', ['D']))
+const supplementalTwoQuestionRange = questionCountEstimate(createEngineState(1, true, 'supplemental', ['D', 'E']))
+const maximumQuestionCount = coreQuestionRange.maximumTotal
 const started = Date.now()
 let successful = 0
 let productionInvalid = 0
@@ -56,7 +59,12 @@ try {
 const plateElapsedMs = Date.now() - started
 const simulation = runAllSimulationGroups(500)
 console.log(JSON.stringify({
-  engine: 'uv8-glyph-clarity-tail',
+  engine: 'uv9-quick-core-optional',
+  questionRanges: {
+    core: coreQuestionRange,
+    supplementalOneDirection: supplementalOneQuestionRange,
+    supplementalTwoDirections: supplementalTwoQuestionRange,
+  },
   plateValidation: {
     cases: totalCases,
     successful,
@@ -82,6 +90,9 @@ console.log(JSON.stringify({
 }, null, 2))
 
 // Engineering regression gates, not clinical validity or normative claims.
+const questionRangeFailed = coreQuestionRange.minimumTotal !== 28 || coreQuestionRange.maximumTotal !== 40
+  || supplementalOneQuestionRange.minimumTotal !== 15 || supplementalOneQuestionRange.maximumTotal !== 21
+  || supplementalTwoQuestionRange.minimumTotal !== 28 || supplementalTwoQuestionRange.maximumTotal !== 40
 const simulationFailed = simulation.some((group) => !Number.isFinite(group.meanAbsoluteError)
   || group.validSessions / group.sessions < 0.9
   || group.usableRate < 0.9
@@ -89,6 +100,6 @@ const simulationFailed = simulation.some((group) => !Number.isFinite(group.meanA
   || group.meanAbsoluteError > group.configuredThreshold * 0.35
   || group.maxTrialCount > maximumQuestionCount)
 if (successful !== totalCases || generationFailures || productionInvalid || coverageFailures || separationFailures || gamutFailures
-  || regenerated || substitutionFailures || unsupportedTargetAccepted || reproducibilityFailures || simulationFailed) {
+  || regenerated || substitutionFailures || unsupportedTargetAccepted || reproducibilityFailures || questionRangeFailed || simulationFailed) {
   throw new Error('Measurement regression audit failed')
 }

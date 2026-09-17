@@ -19,8 +19,8 @@ export function DirectionProfile({ thresholds, usable = true }: DirectionProfile
           const available = hasThreshold(item)
           const showBar = available && usable
           const description = !available ? '目前資料不足以估計' : !usable ? '已記錄於詳細資料' : '本次相對估計'
-          return <div className="direction-row" key={item.directionId}>
-            <div className="direction-name"><span aria-hidden="true" className={`direction-swatch swatch-${item.directionId.toLowerCase()}`} /><span><strong>{DIRECTION_LABELS[item.directionId]}</strong><small>{description}</small></span></div>
+              return <div className="direction-row" key={item.directionId}>
+            <div className="direction-name"><span aria-hidden="true" className={`direction-swatch swatch-${item.directionId.toLowerCase()}`} /><span><strong>{item.label ?? DIRECTION_LABELS[item.directionId] ?? item.directionId}</strong><small>{description}</small></span></div>
             <div className={`direction-bar ${showBar ? '' : 'direction-bar-unavailable'}`} aria-hidden="true">{showBar && <span style={{ width: `${item.threshold! / max * 100}%` }} />}</div>
             <div className="direction-value">{showBar ? item.threshold!.toFixed(4) : available ? '已記錄' : '尚無資料'}</div>
           </div>

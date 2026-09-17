@@ -46,7 +46,7 @@ export function TestScreen({ engine, spec, plate, paused, onPause, onResume, onA
       <header className="test-topbar test-lab-topbar">
         <div className="brand-lockup"><span className="brand-dot" /> JELLY COLOR TEST</div>
         <div className="test-session-info">
-          <div className="test-stage"><span className="stage-dot" /> {phaseLabels[spec.phase]}</div>
+          <div className="test-stage"><span className="stage-dot" /> {engine.mode === 'supplemental' ? '補充方向 · ' : '快速專業版 · '}{phaseLabels[spec.phase]}</div>
           <div className="test-progress-label" aria-live="polite"><strong>{progressLabels[spec.phase]} · {progress}%</strong><span className="test-progress-secondary">第 {currentQuestion} 題 · 共 {totalQuestions} 題</span></div>
         </div>
         <button className="pause-button" type="button" onClick={paused ? onResume : onPause}>{paused ? '繼續測驗' : '暫停一下'}</button>

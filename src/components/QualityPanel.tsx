@@ -17,7 +17,7 @@ export function QualityPanel({ session }: QualityPanelProps) {
         <div className="quality-row"><span>Result Quality</span><strong>{session.resultQualityIndex} / 100</strong><small>{quality.classification}</small></div>
         <div className="quality-row"><span>Interruptions</span><strong>{quality.interruptions}</strong><small>{quality.extremeFastCount + quality.extremeSlowCount} timing flags</small></div>
       </div>
-      {quality.score < 60 ? <div className="quality-warning"><strong>本次資料品質較低</strong><span>{quality.reasons[0] ?? '目前資料較少；已記錄數值保留在詳細資料中。'}</span></div> : <div className="quality-positive"><span>✦</span><div><strong>Result quality · {quality.classification}</strong><span>{session.overallDcdt === undefined ? '目前資料尚未整理整體門檻；已記錄的方向資料保留在下方。' : '品質分數整理本次作答資料，可搭配估計方式與方向資料閱讀。'}</span></div></div>}
+      {quality.score < 60 ? <div className="quality-warning"><strong>本次資料品質較低</strong><span>{quality.reasons[0] ?? '目前資料較少；已記錄數值保留在詳細資料中。'}</span></div> : <div className="quality-positive"><span>✦</span><div><strong>Result quality · {quality.classification}</strong><span>{session.testMode === 'supplemental' && session.overallDcdt === undefined ? '補充測驗未形成整體摘要；已記錄的方向資料保留在下方。' : session.overallDcdt === undefined ? '目前資料尚未整理整體門檻；已記錄的方向資料保留在下方。' : '品質分數整理本次作答資料，可搭配估計方式與方向資料閱讀。'}</span></div></div>}
       {quality.reasons.length > 0 && <div className="reason-list">{quality.reasons.map((reason) => <span key={reason}>· {reason}</span>)}</div>}
     </section>
   )

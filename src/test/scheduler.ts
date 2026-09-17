@@ -1,4 +1,4 @@
-import { adaptiveConfig, DIRECTION_ORDER } from '../psychophysics/config'
+import { adaptiveConfig, DIRECTION_ORDER, OPTIONAL_DIRECTION_ORDER } from '../psychophysics/config'
 import { createStaircase, updateStaircase } from '../psychophysics/staircase'
 import { timingFlagFor } from '../psychophysics/quality'
 import { seededRandom } from '../plate/rng'
@@ -8,6 +8,7 @@ import type {
   QuestionResult,
   StaircaseSnapshot,
   TestEngineState,
+  TestMode,
   TrialSpec,
 } from './types'
 
@@ -22,15 +23,15 @@ export interface QuestionCountEstimate {
   exact: boolean
 }
 
-function directionRecord<T>(factory: (directionId: ColorDirectionId) => T): Record<ColorDirectionId, T> {
-  return Object.fromEntries(DIRECTION_ORDER.map((directionId) => [directionId, factory(directionId)])) as Record<ColorDirectionId, T>
+function directionRecord<T>(directions: ColorDirectionId[], factory: (directionId: ColorDirectionId) => T): Record<ColorDirectionId, T> {
+  return Object.fromEntries(directions.map((directionId) => [directionId, factory(directionId)])) as Record<ColorDirectionId, T>
 }
 
-function createAnchorSlots(): TestEngineState['anchorSlots'] {
+function createAnchorSlots(directions: ColorDirectionId[]): TestEngineState['anchorSlots'] {
   const slots: TestEngineState['anchorSlots'] = []
   for (let anchorIndex = 0; anchorIndex < adaptiveConfig.anchorCountPerDirection; anchorIndex += 1) {
     const base = anchorIndex === 0 ? 3 : 20 + (anchorIndex - 1) * 12
-    DIRECTION_ORDER.forEach((directionId, directionIndex) => {
+    directions.forEach((directionId, directionIndex) => {
       slots.push({ at: base + directionIndex * 3, directionId, index: anchorIndex, answered: false })
     })
   }
@@ -62,20 +63,31 @@ function snapshot(state: TestEngineState['tracks'][ColorDirectionId]): Staircase
   }
 }
 
-export function createEngineState(seed = Math.floor(Math.random() * 0x100000000), environmentConfirmed = false): TestEngineState {
+export function createEngineState(
+  seed = Math.floor(Math.random() * 0x100000000),
+  environmentConfirmed = false,
+  mode: TestMode = 'core',
+  requestedDirections?: ColorDirectionId[],
+  parentSessionId?: string,
+): TestEngineState {
+  const directionOrder = [...new Set(requestedDirections ?? (mode === 'supplemental' ? OPTIONAL_DIRECTION_ORDER : DIRECTION_ORDER))]
+  if (!directionOrder.length) throw new Error('At least one color direction is required')
   return {
     seed,
+    mode,
+    directionOrder,
+    parentSessionId,
     environmentConfirmed,
     phase: 'control',
     status: 'in-progress',
     controlIndex: 0,
     calibrationCursor: 0,
-    calibrationDistances: directionRecord<number>(() => adaptiveConfig.calibrationStartDistance),
-    calibrationAttempts: directionRecord(() => 0),
-    calibrationComplete: directionRecord(() => false),
-    calibrationFailed: directionRecord(() => false),
-    tracks: directionRecord((directionId) => createStaircase(directionId)),
-    anchorSlots: createAnchorSlots(),
+    calibrationDistances: directionRecord(directionOrder, () => adaptiveConfig.calibrationStartDistance),
+    calibrationAttempts: directionRecord(directionOrder, () => 0),
+    calibrationComplete: directionRecord(directionOrder, () => false),
+    calibrationFailed: directionRecord(directionOrder, () => false),
+    tracks: directionRecord(directionOrder, (directionId) => createStaircase(directionId)),
+    anchorSlots: createAnchorSlots(directionOrder),
     anchorLevels: {},
     adaptiveTrialCount: 0,
     schedulerCursor: 0,
@@ -98,14 +110,14 @@ function nextAnchor(state: TestEngineState): TestEngineState['anchorSlots'][numb
 }
 
 function hasActiveTrack(state: TestEngineState): boolean {
-  return DIRECTION_ORDER.some((directionId) => !state.tracks[directionId].stopped && !state.calibrationFailed[directionId])
+  return state.directionOrder.some((directionId) => !state.tracks[directionId].stopped && !state.calibrationFailed[directionId])
 }
 
 function chooseDirection(state: TestEngineState): ColorDirectionId | undefined {
-  const candidates = DIRECTION_ORDER.filter((directionId) => !state.tracks[directionId].stopped && !state.calibrationFailed[directionId])
+  const candidates = state.directionOrder.filter((directionId) => !state.tracks[directionId].stopped && !state.calibrationFailed[directionId])
   if (!candidates.length) return undefined
-  for (let step = 0; step < DIRECTION_ORDER.length; step += 1) {
-    const directionId = DIRECTION_ORDER[(state.schedulerCursor + step) % DIRECTION_ORDER.length]
+  for (let step = 0; step < state.directionOrder.length; step += 1) {
+    const directionId = state.directionOrder[(state.schedulerCursor + step) % state.directionOrder.length]
     if (candidates.includes(directionId)) return directionId
   }
   return candidates[0]
@@ -122,8 +134,8 @@ export function selectNextTrial(state: TestEngineState): TrialSpec | null {
       seed: seedFor(state, state.controlIndex),
     }
   }
-  if (state.phase === 'calibration' && state.calibrationCursor < DIRECTION_ORDER.length) {
-    const directionId = DIRECTION_ORDER[state.calibrationCursor]
+  if (state.phase === 'calibration' && state.calibrationCursor < state.directionOrder.length) {
+    const directionId = state.directionOrder[state.calibrationCursor]
     return {
       id: `calibration-${directionId}-${state.calibrationAttempts[directionId]}`,
       phase: 'calibration',
@@ -253,16 +265,16 @@ export function recordTrial(
       calibrationFailed,
       tracks,
       calibrationCursor: state.calibrationCursor + (shouldAdvance ? 1 : 0),
-      phase: state.calibrationCursor + (shouldAdvance ? 1 : 0) >= DIRECTION_ORDER.length ? 'adaptive' : 'calibration',
+      phase: state.calibrationCursor + (shouldAdvance ? 1 : 0) >= state.directionOrder.length ? 'adaptive' : 'calibration',
     }
   } else if (spec.phase === 'adaptive' && spec.directionId) {
-    const directionIndex = DIRECTION_ORDER.indexOf(spec.directionId)
+    const directionIndex = state.directionOrder.indexOf(spec.directionId)
     const updatedTrack = updateStaircase(state.tracks[spec.directionId], correct, adaptiveConfig, plate.actualNominalDeltaUv)
     next = {
       ...next,
       tracks: { ...state.tracks, [spec.directionId]: updatedTrack },
       adaptiveTrialCount: state.adaptiveTrialCount + 1,
-      schedulerCursor: (directionIndex + 1) % DIRECTION_ORDER.length,
+      schedulerCursor: (directionIndex + 1) % state.directionOrder.length,
     }
     result.staircaseAfter = snapshot(updatedTrack)
   } else if (spec.phase === 'anchor' && spec.directionId) {
@@ -284,12 +296,12 @@ export function recordTrial(
 
 export function progressPercent(state: TestEngineState): number {
   if (state.status === 'complete') return 100
-  const trackProgress = DIRECTION_ORDER.reduce((sum, directionId) => {
+  const trackProgress = state.directionOrder.reduce((sum, directionId) => {
     const track = state.tracks[directionId]
     return sum + Math.min(1, track.trialCount / adaptiveConfig.maximumTrials)
-  }, 0) / DIRECTION_ORDER.length
+  }, 0) / state.directionOrder.length
   const controlProgress = Math.min(1, state.controlIndex / 2) * 0.12
-  const calibrationProgress = (state.calibrationCursor / DIRECTION_ORDER.length) * 0.12
+  const calibrationProgress = (state.calibrationCursor / state.directionOrder.length) * 0.12
   const anchorProgress = ((state.anchorSlots.length - state.anchorSlots.filter((slot) => !slot.answered).length) / state.anchorSlots.length) * 0.1
   return Math.min(100, Math.round((controlProgress + calibrationProgress + trackProgress * 0.66 + anchorProgress) * 100))
 }
@@ -304,7 +316,7 @@ export function questionCountEstimate(state: TestEngineState): QuestionCountEsti
   const answered = state.questions.length
   if (state.status === 'complete') return { answered, minimumTotal: answered, maximumTotal: answered, exact: true }
   if (state.phase === 'control' || state.phase === 'calibration') {
-    const directionCount = DIRECTION_ORDER.length
+    const directionCount = state.directionOrder.length
     const anchorCount = directionCount * adaptiveConfig.anchorCountPerDirection
     return {
       answered,
@@ -316,7 +328,7 @@ export function questionCountEstimate(state: TestEngineState): QuestionCountEsti
 
   let minimumRemaining = 0
   let maximumRemaining = 0
-  DIRECTION_ORDER.forEach((directionId) => {
+  state.directionOrder.forEach((directionId) => {
     if (state.calibrationFailed[directionId]) return
     const track = state.tracks[directionId]
     if (!track.stopped) {

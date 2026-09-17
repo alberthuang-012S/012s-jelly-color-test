@@ -7,7 +7,7 @@ function reportDate(session: TestSession): number {
 }
 
 function hasUsableDcdt(session: TestSession): boolean {
-  return resultPresentation(session).usable && Number.isFinite(session.overallDcdt) && (session.overallDcdt ?? 0) > 0
+  return (session.testMode ?? 'core') === 'core' && resultPresentation(session).usable && Number.isFinite(session.overallDcdt) && (session.overallDcdt ?? 0) > 0
 }
 
 export function comparableSessions(current: TestSession, sessions: TestSession[]): TestSession[] {

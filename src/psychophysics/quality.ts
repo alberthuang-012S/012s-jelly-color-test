@@ -23,7 +23,8 @@ function timingQuality(questions: QuestionResult[]): number {
 }
 
 function completionQuality(engine: TestEngineState): number {
-  return DIRECTION_ORDER.reduce((sum, direction) => {
+  const directionOrder = engine.directionOrder ?? DIRECTION_ORDER
+  return directionOrder.reduce((sum, direction) => {
     const track = engine.tracks[direction]
     if (!engine.calibrationComplete[direction] || engine.calibrationFailed[direction]) return sum
     const threshold = estimateThreshold(direction, engine.questions, track)
@@ -31,7 +32,7 @@ function completionQuality(engine: TestEngineState): number {
     const reversals = Math.min(1, track.reversals.length / adaptiveConfig.targetReversals)
     const anchors = engine.anchorSlots.filter((slot) => slot.directionId === direction && slot.answered).length / adaptiveConfig.anchorCountPerDirection
     return sum + coverage * 25 + reversals * 25 + (threshold.threshold !== undefined ? 40 : 0) + anchors * 10
-  }, 0) / DIRECTION_ORDER.length
+  }, 0) / directionOrder.length
 }
 
 export function calculateResultQualityIndex(

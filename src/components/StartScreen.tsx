@@ -66,8 +66,6 @@ function HeroDotVisual() {
 const previewDirections = [
   { label: '紅－綠雙向軸', value: '0.0184', width: '72%' },
   { label: '藍－黃方向', value: '0.0168', width: '61%' },
-  { label: '紫－綠方向', value: '0.0192', width: '76%' },
-  { label: '青－紅方向', value: '0.0204', width: '83%' },
 ]
 
 export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenProps) {
@@ -86,7 +84,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
           <p className="start-kicker">01 / 色彩辨識挑戰</p>
           <h1 id="start-title"><span>看見</span><span>顏色之間</span><span>微小的差異。</span></h1>
           <p className="start-lede">從彩色圓點中找出隱藏的數字。<br />測驗會根據你的回答，<br className="start-lede-small-break" />逐步調整色彩差異。</p>
-          <p className="start-note"><span className="start-note-mark" aria-hidden="true" />測驗會依你的回答，自動調整難度與長度。</p>
+          <p className="start-note"><span className="start-note-mark" aria-hidden="true" />核心快速版約 28–40 題；完成後可選擇補充方向。</p>
         </div>
         <HeroDotVisual />
         <div className="start-hero-actions">
@@ -115,7 +113,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
       <section className="start-section start-preview" aria-labelledby="start-preview-title">
         <div className="start-section-heading">
           <p className="start-kicker">03 / 結果預覽</p>
-          <h2 id="start-preview-title">完成後，你會看見一份<br />辨識輪廓。</h2>
+          <h2 id="start-preview-title">先完成核心測量，<br />再選擇想看的方向。</h2>
         </div>
         <div className="start-preview-grid">
           <div className="start-preview-metric"><strong>0.0184</strong><span>色差辨識門檻</span><small>示意資料</small></div>
@@ -127,6 +125,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
             </div>)}
           </div>
         </div>
+        <p className="start-preview-note">核心快速版聚焦紅綠與藍黃；紫綠、青紅可在結果頁自行選擇補充測驗。</p>
       </section>
 
       <section className="start-section start-statement" aria-labelledby="start-statement-title">

@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DirectionProfile } from './DirectionProfile'
 import { DifficultyCurve } from './DifficultyCurve'
 import { QualityPanel } from './QualityPanel'
 import { ReportExplanation } from './ReportExplanation'
-import { canCompareResults, resultPresentation } from '../test/report'
-import type { TestSession } from '../test/types'
+import { canCompareResults, hasThreshold, resultPresentation } from '../test/report'
+import { DIRECTION_LABELS, OPTIONAL_DIRECTION_ORDER } from '../psychophysics/config'
+import type { ColorDirectionId, TestSession } from '../test/types'
 
 interface ResultsScreenProps {
   session: TestSession
@@ -12,22 +13,39 @@ interface ResultsScreenProps {
   isHistorical?: boolean
   onRestart: () => void
   onHistory: () => void
+  onStartSupplemental?: (directions: ColorDirectionId[]) => void
 }
 
 function formatDcdt(value: number | undefined): string {
   return value === undefined || !Number.isFinite(value) ? '資料不足' : value.toFixed(4)
 }
 
-export function ResultsScreen({ session, previousSession, isHistorical = false, onRestart, onHistory }: ResultsScreenProps) {
+export function ResultsScreen({ session, previousSession, isHistorical = false, onRestart, onHistory, onStartSupplemental }: ResultsScreenProps) {
   const [advanced, setAdvanced] = useState(false)
+  const [selectedSupplemental, setSelectedSupplemental] = useState<ColorDirectionId[]>([])
   const view = resultPresentation(session)
   const comparable = canCompareResults(session, previousSession)
   const sameDisplayedValue = comparable && formatDcdt(session.overallDcdt) === formatDcdt(previousSession.overallDcdt)
   const thresholds = session.metrics?.directionalThresholds ?? session.directionalThresholds ?? []
+  const validThresholds = thresholds.filter(hasThreshold)
+  const singleSupplementalThreshold = view.isSupplemental && validThresholds.length === 1 ? validThresholds[0].threshold : undefined
+  const highlightedValue = view.usable ? (view.hasOverall ? session.overallDcdt : singleSupplementalThreshold) : undefined
+  const hasHighlightedValue = highlightedValue !== undefined && Number.isFinite(highlightedValue)
   const chromaticAccuracy = Number.isFinite(session.chromaticAccuracy) ? `${session.chromaticAccuracy.toFixed(1)}%` : '資料不足'
   const consistencyIndex = Number.isFinite(session.consistencyIndex) ? session.consistencyIndex : '資料不足'
   const qualityIndex = Number.isFinite(session.resultQualityIndex) ? session.resultQualityIndex : '資料不足'
-  const displayedDcdt = view.usable ? formatDcdt(session.overallDcdt) : view.qualityLabel === '資料不足' ? '尚無法估計' : '目前未列出'
+  const displayedDcdt = hasHighlightedValue ? formatDcdt(highlightedValue) : view.qualityLabel === '資料不足' || view.qualityLabel === '方向資料不足' ? '尚無法估計' : '目前未列出'
+
+  useEffect(() => setSelectedSupplemental([]), [session.id])
+
+  const toggleSupplemental = (directionId: ColorDirectionId) => {
+    setSelectedSupplemental((current) => current.includes(directionId) ? current.filter((item) => item !== directionId) : [...current, directionId])
+  }
+
+  const startSupplemental = () => {
+    if (selectedSupplemental.length && onStartSupplemental) onStartSupplemental(selectedSupplemental)
+  }
+
   return (
     <main className="page-shell results-page readable-report premium-report">
       <div className="topbar results-topbar">
@@ -36,18 +54,18 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
       </div>
       <section className="report-hero" aria-labelledby="result-title">
         <div className="report-hero-copy">
-          <div className="report-intro-meta"><span className="section-kicker">本次色彩輪廓摘要</span>{isHistorical && <span className="historical-readonly">歷史報告 · 唯讀</span>}<span>已作答 {session.questions.length} 題</span></div>
-          <span className="report-hero-overline">PERSONAL COLOR PROFILE</span>
+          <div className="report-intro-meta"><span className="section-kicker">{view.isSupplemental ? '補充方向摘要' : '本次色彩輪廓摘要'}</span>{isHistorical && <span className="historical-readonly">歷史報告 · 唯讀</span>}<span>已作答 {session.questions.length} 題</span></div>
+          <span className="report-hero-overline">{view.isSupplemental ? 'SUPPLEMENTAL COLOR PROFILE' : 'PERSONAL COLOR PROFILE'}</span>
           <h1 id="result-title">{view.title}</h1>
           <p className="report-hero-summary">{view.summary}</p>
-          <div className="report-hero-status"><span aria-hidden="true" />測驗完成 · 本頁整理本次相對表現</div>
+          <div className="report-hero-status"><span aria-hidden="true" />{session.status === 'complete' ? '測驗完成' : '測驗紀錄'} · 本頁整理本次相對表現</div>
         </div>
-        <article className="report-dcdt-card" aria-label="整體 dCDT 結果">
-          <div className="report-card-label"><span>OVERALL</span><strong>dCDT</strong></div>
-          <strong className={`report-dcdt-value${view.usable ? '' : ' report-dcdt-value-text'}`}>{displayedDcdt}</strong>
-          <span className="report-dcdt-unit">nominal Δu′v′</span>
-          <p>{view.usable ? '在相同顯示條件下，數值越低代表本次能辨認的色差越細微。' : '目前未整理整體門檻；已記錄的方向資料保留在下方。'}</p>
-          {view.usable && <small>{view.tentative ? '本次方向估計' : '本次相對估計'} · 非百分制分數</small>}
+        <article className="report-dcdt-card" aria-label={view.isSupplemental ? '補充方向結果' : '整體 dCDT 結果'}>
+          <div className="report-card-label"><span>{view.isSupplemental ? 'SUPPLEMENT' : 'OVERALL'}</span><strong>{view.isSupplemental && !view.hasOverall ? '方向' : 'dCDT'}</strong></div>
+          <strong className={`report-dcdt-value${hasHighlightedValue ? '' : ' report-dcdt-value-text'}`}>{displayedDcdt}</strong>
+          <span className="report-dcdt-unit">{view.isSupplemental && !view.hasOverall ? 'direction threshold' : 'nominal Δu′v′'}</span>
+          <p>{hasHighlightedValue ? view.isSupplemental && !view.hasOverall ? '這是所選補充方向的個別門檻；核心快速版 dCDT 維持在原快速版報告。' : '在相同顯示條件下，數值越低代表本次能辨認的色差越細微。' : view.isSupplemental ? '目前未整理補充方向門檻；已記錄的方向資料保留在下方。' : '目前未整理整體門檻；已記錄的方向資料保留在下方。'}</p>
+          {hasHighlightedValue && <small>{view.isSupplemental && !view.hasOverall ? '所選方向相對估計' : view.tentative ? '本次方向估計' : '本次相對估計'} · 非百分制分數</small>}
         </article>
       </section>
 
@@ -68,13 +86,28 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
 
       <section className="report-reading-note" aria-label="結果閱讀提示">
         <span className="section-kicker">HOW TO READ</span>
-        <p>先看整體 dCDT，再看下方各個色彩方向；方向數值能幫助你理解本次輪廓的差異。</p>
+        <p>{view.isSupplemental ? '這是補充方向報告；先看所選方向的 Threshold，核心 dCDT 請回到快速版報告。' : '先看整體 dCDT，再看下方各個色彩方向；方向數值能幫助你理解本次輪廓的差異。'}</p>
       </section>
 
       <DirectionProfile thresholds={thresholds} usable={view.usable} />
       <section className="report-next" aria-labelledby="report-next-title">
         <div className="section-heading"><div><span className="section-kicker">接下來可以這樣做</span><h2 id="report-next-title">讓下一次結果更有參考價值</h2></div></div>
         <ul className="report-suggestions">{view.suggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}</ul>
+
+        {!isHistorical && !view.isSupplemental && onStartSupplemental && <section className="supplemental-picker" aria-labelledby="supplemental-picker-title">
+          <div className="supplemental-picker-heading"><div><span className="section-kicker">OPTIONAL DIRECTIONS</span><h3 id="supplemental-picker-title">想再看看其他色彩方向？</h3></div><span className="supplemental-picker-count">可複選</span></div>
+          <p>核心快速版已完成紅綠與藍黃。你可以從下面選擇紫綠、青紅，另外建立補充方向紀錄。</p>
+          <div className="supplemental-options" role="group" aria-label="選擇補充色彩方向">
+            {OPTIONAL_DIRECTION_ORDER.map((directionId) => {
+              const selected = selectedSupplemental.includes(directionId)
+              return <button className={`supplemental-option${selected ? ' supplemental-option-selected' : ''}`} type="button" key={directionId} aria-pressed={selected} onClick={() => toggleSupplemental(directionId)}>
+                <span className={`direction-swatch swatch-${directionId.toLowerCase()}`} aria-hidden="true" /><span>{DIRECTION_LABELS[directionId]}</span><strong aria-hidden="true">{selected ? '✓' : '+'}</strong>
+              </button>
+            })}
+          </div>
+          <button className="button button-primary supplemental-start" type="button" disabled={!selectedSupplemental.length} onClick={startSupplemental}>開始補充測驗{selectedSupplemental.length > 0 ? `（${selectedSupplemental.length} 個方向）` : ''} →</button>
+        </section>}
+
         {comparable && <div className="report-comparison">
           <h3>與上一次相比</h3>
           <div><span>上次 <strong>{formatDcdt(previousSession.overallDcdt)}</strong></span><span aria-hidden="true">→</span><span>本次 <strong>{formatDcdt(session.overallDcdt)}</strong></span></div>
@@ -94,7 +127,7 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
             <div><dt>非檢查題正確率（CA）</dt><dd>{chromaticAccuracy}</dd></div>
             <div><dt>回答一致性（CI）</dt><dd>{consistencyIndex} / 100</dd></div>
             <div><dt>資料品質（RQI）</dt><dd>{qualityIndex} / 100</dd></div>
-            <div><dt>整體門檻（dCDT）</dt><dd>{formatDcdt(session.overallDcdt)}{Number.isFinite(session.overallDcdt) && ' nominal Δu′v′'}</dd></div>
+            <div><dt>{view.isSupplemental && !view.hasOverall ? '補充方向門檻' : '整體門檻（dCDT）'}</dt><dd>{formatDcdt(session.overallDcdt)}{Number.isFinite(session.overallDcdt) && ' nominal Δu′v′'}</dd></div>
             <div><dt>引擎版本</dt><dd>{session.engineVersion ?? '未記錄'}</dd></div>
           </dl>
           <p className="footnote">題目會依回答調整難度，正確率不等於固定難度考卷的成績。門檻採本次已記錄的方向資料整理。</p>
@@ -102,7 +135,7 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
             <caption>各方向的估計依據</caption>
             <thead><tr><th scope="col">方向</th><th scope="col">門檻</th><th scope="col">方法</th><th scope="col">題數／反轉</th><th scope="col">資料狀態</th></tr></thead>
             <tbody>{thresholds.map((item) => <tr key={item.directionId}>
-              <th scope="row">{item.label ?? item.directionId}</th><td>{formatDcdt(item.threshold)}</td>
+              <th scope="row">{item.label ?? DIRECTION_LABELS[item.directionId] ?? item.directionId}</th><td>{formatDcdt(item.threshold)}</td>
               <td>{item.thresholdMethod === 'psychometric' ? '75% 曲線擬合' : item.thresholdMethod === 'reversal-fallback' ? '反轉點備援' : '資料不足'}</td>
               <td>{item.trialCount}／{item.reversalCount}</td><td>{item.insufficientCalibration ? '校準不足' : item.convergenceQuality === 'high' ? '資料條件完成' : '資料條件未完成'}</td>
             </tr>)}</tbody>

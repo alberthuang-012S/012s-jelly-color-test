@@ -7,7 +7,7 @@ import { createStaircase, updateStaircase } from '../psychophysics/staircase'
 import { estimateThreshold, overallThreshold } from '../psychophysics/threshold'
 import { calculateAllMetrics } from '../psychophysics/metrics'
 import { calculateConsistencyIndex } from '../psychophysics/consistency'
-import { DIRECTION_ORDER } from '../psychophysics/config'
+import { DIRECTION_ORDER, OPTIONAL_DIRECTION_ORDER } from '../psychophysics/config'
 import { question } from './fixtures'
 
 function next(state = createEngineState(123)) {
@@ -40,15 +40,15 @@ describe('measurement engine invariants', () => {
     const track = { ...createStaircase('A'), trialCount: 17 }
     expect(updateStaircase(track, true)).toMatchObject({ stopped: true, converged: false, convergenceQuality: 'low' })
   })
-  it('does not truncate at 35 adaptive trials', () => {
+  it('keeps the core quick session within the compact question range', () => {
     let state = createEngineState(123)
-    expect(questionCountEstimate(state)).toMatchObject({ answered: 0, minimumTotal: 54, maximumTotal: 78, exact: false })
+    expect(questionCountEstimate(state)).toMatchObject({ answered: 0, minimumTotal: 28, maximumTotal: 40, exact: false })
     for (let guard = 0; guard < 160 && state.status === 'in-progress'; guard++) {
       const { spec, plate } = next(state)
       state = recordTrial(state, spec, spec.targetNumber, 800, false, plate)
     }
     expect(state.status).toBe('complete')
-    expect(state.adaptiveTrialCount).toBe(56)
+    expect(state.adaptiveTrialCount).toBe(28)
     expect(state.questions.some((item) => ![6, 12, 29, 45, 74].includes(item.targetNumber))).toBe(true)
     expect(Object.values(state.tracks).every((track) => track.stopped && !track.converged)).toBe(true)
     expect(progressPercent(state)).toBe(100)
@@ -65,7 +65,29 @@ describe('measurement engine invariants', () => {
     expect(afterCalibration.answered).toBe(state.questions.length)
     expect(afterCalibration.minimumTotal).toBeGreaterThanOrEqual(afterCalibration.answered)
     expect(afterCalibration.maximumTotal).toBeGreaterThanOrEqual(afterCalibration.minimumTotal)
-    expect(afterCalibration.maximumTotal).toBeLessThanOrEqual(78)
+    expect(afterCalibration.maximumTotal).toBeLessThanOrEqual(40)
+  })
+
+  it('runs only the directions selected for a supplemental session', () => {
+    const state = createEngineState(123, true, 'supplemental', ['D'])
+    expect(state.mode).toBe('supplemental')
+    expect(state.directionOrder).toEqual(['D'])
+    expect(Object.keys(state.tracks)).toEqual(['D'])
+    expect(questionCountEstimate(state)).toMatchObject({ minimumTotal: 15, maximumTotal: 21, exact: false })
+    expect(selectNextTrial(state)?.directionId).toBeUndefined()
+    expect(OPTIONAL_DIRECTION_ORDER).toContain('D')
+  })
+
+  it('completes a selected supplemental direction independently', () => {
+    let state = createEngineState(4321, true, 'supplemental', ['E'])
+    for (let guard = 0; guard < 80 && state.status === 'in-progress'; guard++) {
+      const { spec, plate } = next(state)
+      state = recordTrial(state, spec, spec.targetNumber, 800, false, plate)
+    }
+    expect(state.status).toBe('complete')
+    expect(state.questions.filter((item) => item.phase !== 'control').every((item) => item.directionId === 'E')).toBe(true)
+    expect(state.questions.length).toBeGreaterThanOrEqual(15)
+    expect(state.questions.length).toBeLessThanOrEqual(21)
   })
   it('calibration failure cannot produce anchors or thresholds', () => {
     let state = createEngineState(123)

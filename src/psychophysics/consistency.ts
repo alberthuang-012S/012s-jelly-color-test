@@ -1,7 +1,7 @@
 import { clamp } from './colorSpace'
 import { DIRECTION_ORDER } from './config'
 import { fitPsychometricCurve } from './psychometric'
-import type { ConsistencyBreakdown, QuestionResult } from '../test/types'
+import type { ColorDirectionId, ConsistencyBreakdown, QuestionResult } from '../test/types'
 
 function anchorAgreement(questions: QuestionResult[]): number {
   const grouped = new Map<string, QuestionResult[]>()
@@ -47,10 +47,11 @@ function fitQuality(questions: QuestionResult[]): number {
   return 0
 }
 
-export function calculateConsistencyIndex(questions: QuestionResult[]): ConsistencyBreakdown {
+export function calculateConsistencyIndex(questions: QuestionResult[], directionOrder: ColorDirectionId[] = DIRECTION_ORDER): ConsistencyBreakdown {
   const anchor = anchorAgreement(questions)
   const mono = monotonicity(questions)
-  const fit = DIRECTION_ORDER.reduce((sum, direction) => sum + fitQuality(questions.filter((question) => question.directionId === direction && question.phase === 'adaptive')), 0) / DIRECTION_ORDER.length
+  const directions = directionOrder.length ? directionOrder : DIRECTION_ORDER
+  const fit = directions.reduce((sum, direction) => sum + fitQuality(questions.filter((question) => question.directionId === direction && question.phase === 'adaptive')), 0) / directions.length
   const score = Math.round(anchor * 0.4 + mono * 0.3 + fit * 0.3)
   return {
     score: clamp(score, 0, 100),

@@ -18,6 +18,7 @@ function displayDate(value: string): string {
 
 function statusLabel(session: TestSession, isComparable: boolean): string {
   if (isComparable) return '可納入趨勢'
+  if (session.testMode === 'supplemental') return session.status === 'partial' ? '補充未完成，僅保存' : '補充方向，僅保存'
   if (session.status === 'partial') return '未完成，僅保存'
   return resultPresentation(session).usable ? '條件不同，僅保存' : '未納入趨勢，僅保存'
 }
@@ -38,13 +39,15 @@ export function HistoryScreen({ sessions, onBack, onStart, onOpenSession }: Hist
         <section className="history-records-section" aria-labelledby="history-records-title">
           <div className="history-section-heading"><div><span className="section-kicker">02 / ALL RECORDS</span><h2 id="history-records-title">所有測量紀錄 <small>{sessions.length} / 20</small></h2></div></div>
           <div className="history-list">{sessions.map((session) => {
-            const view = resultPresentation(session)
             const isComparable = comparableIds.has(session.id)
+            const isSupplemental = session.testMode === 'supplemental'
+            const firstThreshold = session.metrics?.directionalThresholds?.find((item) => Number.isFinite(item.threshold))?.threshold
+            const historyValue = Number.isFinite(session.overallDcdt) ? session.overallDcdt : firstThreshold
             return <article className={`history-card ${isComparable ? 'history-card-comparable' : 'history-card-record-only'}`} key={session.id}>
               <button className="history-card-open" type="button" onClick={() => onOpenSession(session)} aria-label={`查看 ${displayDate(session.startedAt)} 的完整報告`}>
                 <div className="history-date"><span>{displayDate(session.startedAt)}</span><span className="history-status">{statusLabel(session, isComparable)}</span></div>
-                <div className="history-metrics"><div><small>dCDT</small><strong>{Number.isFinite(session.overallDcdt) ? session.overallDcdt!.toFixed(4) : '—'}</strong></div><div><small>CA</small><strong>{Number.isFinite(session.chromaticAccuracy) ? `${session.chromaticAccuracy.toFixed(1)}%` : '—'}</strong></div><div><small>CI</small><strong>{Number.isFinite(session.consistencyIndex) ? session.consistencyIndex : '—'}</strong></div><div><small>RQI</small><strong>{Number.isFinite(session.resultQualityIndex) ? session.resultQualityIndex : '—'}</strong></div></div>
-                <div className="history-card-footer"><span>{thresholdCount(session)} 個方向估計 · {session.questions?.length ?? 0} 題</span><span className="history-card-link">查看完整報告 <span aria-hidden="true">→</span></span></div>
+                <div className="history-metrics"><div><small>{isSupplemental ? '方向' : 'dCDT'}</small><strong>{Number.isFinite(historyValue) ? historyValue!.toFixed(4) : '—'}</strong></div><div><small>CA</small><strong>{Number.isFinite(session.chromaticAccuracy) ? `${session.chromaticAccuracy.toFixed(1)}%` : '—'}</strong></div><div><small>CI</small><strong>{Number.isFinite(session.consistencyIndex) ? session.consistencyIndex : '—'}</strong></div><div><small>RQI</small><strong>{Number.isFinite(session.resultQualityIndex) ? session.resultQualityIndex : '—'}</strong></div></div>
+                <div className="history-card-footer"><span>{isSupplemental ? '補充方向' : `${thresholdCount(session)} 個方向估計`} · {session.questions?.length ?? 0} 題</span><span className="history-card-link">查看完整報告 <span aria-hidden="true">→</span></span></div>
               </button>
             </article>
           })}</div>
