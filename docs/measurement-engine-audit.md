@@ -3,12 +3,12 @@
 ## Run metadata
 
 - Date: 2026-09-17 (Asia/Taipei)
-- Engine version: `uv8-glyph-clarity-tail`
-- Git SHA under audit: `b24e7166d19928a40a3efa22e546c17b8087856e`
+- Engine version: `uv9-quick-core-optional`
+- Git SHA under audit: `5065e3248ee53736cbec93eebe859df330b83ff2`
 - Scope: current production `buildTestSession()` engine and current `generatePlate()` generator
 - Result: **PASS — engineering regression gates**
 
-This file describes the current `uv8-glyph-clarity-tail` engine. Earlier engine numbers are not carried forward as current-engine evidence.
+This file describes the current `uv9-quick-core-optional` engine. Earlier engine numbers are not carried forward as current-engine evidence.
 
 ## Commands
 
@@ -25,7 +25,19 @@ The audit command was run from the SHA above with:
 npm run audit
 ```
 
-The full verification run also passed: TypeScript type check, 14 test files / 60 tests, and the production Vite build.
+The full verification run also passed: TypeScript type check, 14 test files / 64 tests, and the production Vite build.
+
+## Question ranges
+
+The default core session measures red-green bipolar and blue-yellow directions. Purple-green and cyan-red are selected later from the core report and saved as separate supplemental sessions.
+
+| Session mode | Initial lower bound | Initial upper bound |
+| --- | ---: | ---: |
+| Core quick session | 28 | 40 |
+| One supplemental direction | 15 | 21 |
+| Two supplemental directions | 28 | 40 |
+
+The bounds include 2 control trials, per-direction calibration, 10–14 adaptive trials per direction, and 2 repeated-level anchor trials per direction. The range updates as calibration and tracks finish.
 
 ## Plate validation
 
@@ -47,7 +59,7 @@ The matrix contains 4 measurement axes × 100 target numbers (0–99) × 10 even
 
 ## Virtual-observer regression
 
-Each group contains 500 deterministic sessions. The observer uses the existing open-response simulation philosophy: logistic probability in log nominal distance, slope 4, 75% correct at the configured threshold, and no 50% guessing floor. “Usable” is the existing result-eligibility concept: at least two finite direction estimates, complete data, and RQI ≥ 60. Convergence is reported separately; reaching the 14-trial ceiling remains low convergence and is not reclassified as convergence.
+Each group contains 500 deterministic core sessions. The observer uses the existing open-response simulation philosophy: logistic probability in log nominal distance, slope 4, 75% correct at the configured threshold, and no 50% guessing floor. “Usable” is the existing core result-eligibility concept: two finite direction estimates, complete data, and RQI ≥ 60. Convergence is reported separately; reaching the 14-trial ceiling remains low convergence and is not reclassified as convergence.
 
 | Configured threshold | Usable rate | Median estimate | Bias | MAE | Mean trials | Median trials | Min–max trials | Convergence | Low convergence | Psychometric fit | Reversal fallback | Failed calibration |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -59,7 +71,7 @@ Directional estimate counts were 1,942, 1,914 and 1,981 in the three groups. Fit
 
 ## What was not changed
 
-This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/maximum distances, color space, palette validation, and dCDT/CA/CI/RQI formulas. It treats red–green as one bipolar axis with deterministic polarity switching, retains blue–yellow, and adds purple–green and cyan–red. It shortens each axis to 10–14 adaptive trials with a five-reversal stopping target, keeps paired anchors, and changes only the stimulus glyph paths for `4`, `5`, and `6`: `4` has a visible central counter, `5` has an open lower stroke with a low tail, and `6` has a larger closed bowl. The engine version is bumped so earlier results remain readable but are not compared with this stimulus revision.
+This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/maximum distances, color space, palette validation, and dCDT/CA/CI/RQI formulas. The default core session measures red–green as one bipolar axis and blue–yellow; purple–green and cyan–red remain available as explicitly selected supplemental directions. Each selected axis runs for 10–14 adaptive trials with a five-reversal stopping target and paired anchors. Core and supplemental records retain their mode and direction list; supplemental results do not enter the core dCDT trend. The engine version is bumped so earlier results remain readable but are not compared with this scope revision.
 
 ## Limitations
 
@@ -68,5 +80,5 @@ This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/m
 - No clinical validation, population norm, percentile, diagnosis, or normal/abnormal range is established.
 - Virtual observers cover one response model and do not establish real-user accuracy, lapse/guess behavior, device equivalence, confidence intervals, or empirical repeatability.
 - The current 14-trial stopping rule produces a high low-convergence rate and more reversal fallbacks in this simulation. That is reported honestly; low convergence is not silently promoted to a convergence claim, and the existing audit gates were not weakened to hide it.
-- The red–green axis alternates its two polarities; blue–yellow, purple–green and cyan–red are display-relative supplemental directions rather than clinical confusion axes.
+- The red–green axis alternates its two polarities; blue–yellow is part of the core, while purple–green and cyan–red are display-relative supplemental directions rather than clinical confusion axes.
 - The audit is a software regression check, not evidence that the measurement is clinically valid.
