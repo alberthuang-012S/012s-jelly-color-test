@@ -1,6 +1,8 @@
 import type { ColorDirectionId } from '../test/types'
 
-export const DIRECTION_ORDER: ColorDirectionId[] = ['A', 'B', 'C', 'D', 'E']
+// A/B are retained for reading legacy sessions. New sessions use RG as one
+// bipolar red-green axis, plus three complementary display-relative axes.
+export const DIRECTION_ORDER: ColorDirectionId[] = ['RG', 'C', 'D', 'E']
 
 export const DIRECTION_LABELS: Record<ColorDirectionId, string> = {
   A: '紅－綠方向',
@@ -8,6 +10,7 @@ export const DIRECTION_LABELS: Record<ColorDirectionId, string> = {
   C: '藍－黃方向',
   D: '紫－綠方向',
   E: '青－紅方向',
+  RG: '紅－綠雙向軸',
 }
 
 export const adaptiveConfig = {
@@ -19,8 +22,8 @@ export const adaptiveConfig = {
   baseStep: 0.012,
   stepFactors: [1, 1, 0.6, 0.6, 0.35],
   minimumTrials: 10,
-  maximumTrials: 18,
-  targetReversals: 7,
+  maximumTrials: 14,
+  targetReversals: 5,
   thresholdCriterion: 0.75,
   anchorCountPerDirection: 2,
 } as const

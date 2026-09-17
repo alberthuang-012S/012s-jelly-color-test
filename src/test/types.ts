@@ -1,4 +1,5 @@
-export type ColorDirectionId = 'A' | 'B' | 'C' | 'D' | 'E'
+export type ColorDirectionId = 'A' | 'B' | 'C' | 'D' | 'E' | 'RG'
+export type ColorPolarityId = 'A' | 'B'
 export type TestPhase = 'control' | 'calibration' | 'adaptive' | 'anchor'
 export type ThresholdMethod = 'psychometric' | 'reversal-fallback'
 
@@ -58,6 +59,7 @@ export interface GeneratedPlate {
   seed: number
   targetNumber: number
   directionId?: ColorDirectionId
+  polarityId?: ColorPolarityId
   requestedDistance: number
   actualNominalDeltaUv: number
   figureColor: { r: number; g: number; b: number }
@@ -82,6 +84,7 @@ export interface QuestionResult {
   id: string
   phase: TestPhase
   directionId?: ColorDirectionId
+  polarityId?: ColorPolarityId
   targetNumber: number
   answer: number | null
   correct: boolean

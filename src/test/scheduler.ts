@@ -206,6 +206,7 @@ export function recordTrial(
     id: spec.id,
     phase: spec.phase,
     directionId: spec.directionId,
+    polarityId: plate.polarityId,
     targetNumber: spec.targetNumber,
     answer,
     correct,

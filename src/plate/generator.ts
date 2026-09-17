@@ -38,6 +38,7 @@ export function generatePlate(request: PlateRequest): GeneratedPlate {
       seed: request.seed,
       targetNumber: request.number,
       directionId: direction,
+      polarityId: palette.polarityId,
       requestedDistance: request.requestedDistance,
       actualNominalDeltaUv: dotNominalDistance(dots),
       figureColor: palette.figureColor,

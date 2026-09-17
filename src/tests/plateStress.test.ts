@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { generatePlate } from '../plate/generator'
+import { generatePalette } from '../plate/palettes'
 import { DIRECTION_ORDER } from '../psychophysics/config'
 
 describe('plate generator stress', () => {
@@ -32,6 +33,15 @@ describe('plate generator stress', () => {
     for (const number of [-1, 100, 101, Number.NaN]) {
       expect(() => generatePlate({ direction: 'A', requestedDistance: 0.042, number, seed: 7, phase: 'adaptive' })).toThrow('Unsupported target number')
     }
+  })
+
+  it('switches red-green polarity deterministically on the bipolar axis', () => {
+    const first = generatePalette('RG', 0.042, 100)
+    const second = generatePalette('RG', 0.042, 101)
+    expect(first.polarityId).toBeDefined()
+    expect(second.polarityId).toBeDefined()
+    expect(first.polarityId).not.toBe(second.polarityId)
+    expect(first).toEqual(generatePalette('RG', 0.042, 100))
   })
 
   it('is reproducible at the distance limits and an intermediate distance', () => {

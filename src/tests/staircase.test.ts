@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createStaircase, detectReversal, updateStaircase } from '../psychophysics/staircase'
+import { adaptiveConfig } from '../psychophysics/config'
 
 describe('2-down / 1-up staircase', () => {
   it('waits for two consecutive correct answers before getting harder', () => {
@@ -40,10 +41,10 @@ describe('2-down / 1-up staircase', () => {
 
   it('stops on the maximum trial guard even without convergence', () => {
     let state = createStaircase('A', 0.03)
-    for (let index = 0; index < 18; index += 1) state = updateStaircase(state, true)
+    for (let index = 0; index < adaptiveConfig.maximumTrials; index += 1) state = updateStaircase(state, true)
     expect(state.stopped).toBe(true)
     expect(state.converged).toBe(false)
     expect(state.convergenceQuality).toBe('low')
-    expect(state.trialCount).toBe(18)
+    expect(state.trialCount).toBe(adaptiveConfig.maximumTrials)
   })
 })

@@ -218,6 +218,7 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .direction-swatch { width: 12px; height: 30px; border-radius: 99px; }
 .swatch-a { background: linear-gradient(var(--coral), var(--acid)); }
 .swatch-b { background: linear-gradient(var(--acid), var(--coral)); }
+.swatch-rg { background: linear-gradient(var(--coral), var(--acid)); }
 .swatch-c { background: linear-gradient(var(--blue), #f3cf65); }
 .swatch-d { background: linear-gradient(#8d7be8, #9bcf98); }
 .swatch-e { background: linear-gradient(#7fc5d7, #ec8a73); }
