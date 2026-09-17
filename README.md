@@ -29,9 +29,10 @@ The audit includes a 12,000-case production validation matrix (4 directions × 1
 - Response time and focus interruptions are retained for timing flags and RQI; they do not directly reduce color ability metrics.
 - History is local-only and limited to 20 sessions. RQI < 60 remains visible but is excluded from usable trend data.
 
-### Engine revision: `uv6-bipolar-red-green`
+### Engine revision: `uv7-glyph-clarity`
 
 - Single- and two-digit masks use equal physical glyph-cell proportions on the 5:3 canvas, with a shared height and centered placement. Single digits are no longer stretched across the entire plate. The coverage gate now allows the smaller single-digit figure (8% coverage, at least 40 figure dots); all 100 targets are covered by plate stress tests. This stimulus geometry change uses a new version to avoid direct comparison with older results.
+- The `4` mask keeps a visible central counter, while `5` uses an open lower stroke and `6` retains a larger closed bowl so the most confusable glyph pair remains visually distinct at low contrast. This stimulus geometry change uses a new engine revision and should not be compared directly with older results.
 - The answering layout places controls beside the plate on desktop and uses a compact two-row keypad on portrait phones. Read-only answer display avoids triggering a second on-screen keyboard; physical number keys, deletion and Enter from the answer field remain supported. Very small viewports or accessibility zoom may still require scrolling rather than cropping content.
 
 - Answers are sampled uniformly from 0–99 with replacement on every trial (including controls and anchors). Repeated answers are allowed. All ten digit masks are explicit; unsupported targets throw rather than silently rendering another digit. Session seeds reproduce the answer sequence. Changing the target set changes stimulus composition, so this revision is not directly compared with older results.

@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest'
 import { buildDotLayout } from '../plate/mask'
 import { generatePlate } from '../plate/generator'
+import { adaptiveConfig } from '../psychophysics/config'
 
 const distanceFromPlateCenter = (x: number, y: number) => Math.hypot(x - 0.5, y - 0.5)
 
@@ -41,5 +42,21 @@ it('keeps single and double digit masks populated and production-valid', () => {
     expect(figureCount).toBeGreaterThanOrEqual(40)
     expect(backgroundCount).toBeGreaterThanOrEqual(180)
     expect(plate.validation.productionValid).toBe(true)
+  }
+})
+
+it('keeps the clarified 4/5/6 masks production-valid across contrast levels', () => {
+  for (const number of [4, 5, 6]) {
+    for (const requestedDistance of [adaptiveConfig.minDistance, adaptiveConfig.initialDistance, adaptiveConfig.maxDistance]) {
+      const plate = generatePlate({
+        direction: 'A',
+        requestedDistance,
+        number,
+        seed: 12000 + number * 100 + Math.round(requestedDistance * 100000),
+        phase: 'adaptive',
+      })
+
+      expect(plate.validation.productionValid).toBe(true)
+    }
   }
 })
