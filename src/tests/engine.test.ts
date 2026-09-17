@@ -7,6 +7,7 @@ import { createStaircase, updateStaircase } from '../psychophysics/staircase'
 import { estimateThreshold, overallThreshold } from '../psychophysics/threshold'
 import { calculateAllMetrics } from '../psychophysics/metrics'
 import { calculateConsistencyIndex } from '../psychophysics/consistency'
+import { DIRECTION_ORDER } from '../psychophysics/config'
 import { question } from './fixtures'
 
 function next(state = createEngineState(123)) {
@@ -16,6 +17,15 @@ function next(state = createEngineState(123)) {
 }
 
 describe('measurement engine invariants', () => {
+  it('keeps every configured color direction in the engine and metric outputs', () => {
+    const state = createEngineState(123)
+    const metrics = calculateAllMetrics(state)
+    expect(Object.keys(state.tracks)).toEqual(DIRECTION_ORDER)
+    expect(state.anchorSlots).toHaveLength(DIRECTION_ORDER.length * 2)
+    expect(metrics.directionalThresholds.map((item) => item.directionId)).toEqual(DIRECTION_ORDER)
+    expect(Object.keys(metrics.directionAccuracy)).toEqual(DIRECTION_ORDER)
+  })
+
   it('uses actual presented distance for moves and reversals', () => {
     const track = { ...createStaircase('A', 0.05), previousMovement: 'harder' as const }
     const updated = updateStaircase(track, false, undefined, 0.025)
@@ -32,13 +42,13 @@ describe('measurement engine invariants', () => {
   })
   it('does not truncate at 35 adaptive trials', () => {
     let state = createEngineState(123)
-    expect(questionCountEstimate(state)).toMatchObject({ answered: 0, minimumTotal: 41, maximumTotal: 71, exact: false })
-    for (let guard = 0; guard < 80 && state.status === 'in-progress'; guard++) {
+    expect(questionCountEstimate(state)).toMatchObject({ answered: 0, minimumTotal: 67, maximumTotal: 117, exact: false })
+    for (let guard = 0; guard < 160 && state.status === 'in-progress'; guard++) {
       const { spec, plate } = next(state)
       state = recordTrial(state, spec, spec.targetNumber, 800, false, plate)
     }
     expect(state.status).toBe('complete')
-    expect(state.adaptiveTrialCount).toBe(54)
+    expect(state.adaptiveTrialCount).toBe(90)
     expect(state.questions.some((item) => ![6, 12, 29, 45, 74].includes(item.targetNumber))).toBe(true)
     expect(Object.values(state.tracks).every((track) => track.stopped && !track.converged)).toBe(true)
     expect(progressPercent(state)).toBe(100)
@@ -55,17 +65,17 @@ describe('measurement engine invariants', () => {
     expect(afterCalibration.answered).toBe(state.questions.length)
     expect(afterCalibration.minimumTotal).toBeGreaterThanOrEqual(afterCalibration.answered)
     expect(afterCalibration.maximumTotal).toBeGreaterThanOrEqual(afterCalibration.minimumTotal)
-    expect(afterCalibration.maximumTotal).toBeLessThanOrEqual(71)
+    expect(afterCalibration.maximumTotal).toBeLessThanOrEqual(117)
   })
   it('calibration failure cannot produce anchors or thresholds', () => {
     let state = createEngineState(123)
-    for (let guard = 0; guard < 80 && state.status === 'in-progress'; guard++) {
+    for (let guard = 0; guard < 160 && state.status === 'in-progress'; guard++) {
       const { spec, plate } = next(state)
       state = recordTrial(state, spec, null, 800, false, plate)
     }
     expect(state.status).toBe('complete')
     expect(state.questions.filter((item) => item.phase === 'anchor')).toHaveLength(0)
-    expect(Object.values(state.calibrationFailed)).toEqual([true, true, true])
+    expect(Object.values(state.calibrationFailed)).toEqual(DIRECTION_ORDER.map(() => true))
     expect(calculateAllMetrics(state).overallDcdt).toBeUndefined()
   })
   it('rejects invalid plates, mismatched plates, duplicate submissions, and invalid responses', () => {

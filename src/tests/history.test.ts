@@ -6,6 +6,7 @@ import { buildTestSession } from '../test/session'
 import { createEngineState } from '../test/scheduler'
 import { question } from './fixtures'
 import type { TestSession } from '../test/types'
+import { DIRECTION_ORDER } from '../psychophysics/config'
 
 const device = {
   viewport: '1280×800',
@@ -24,8 +25,8 @@ function makeSession(id: string, date: string, changes: Partial<TestSession> = {
   session.resultQualityIndex = 90
   session.consistencyIndex = 88
   session.questions = Array.from({ length: 12 }, (_, index) => question({ id: `${id}-${index}` }))
-  session.metrics.directionalThresholds = ['A', 'B', 'C'].map((directionId, index) => ({
-    directionId: directionId as 'A' | 'B' | 'C',
+  session.metrics.directionalThresholds = DIRECTION_ORDER.map((directionId, index) => ({
+    directionId,
     threshold: 0.018 + index * 0.002,
     thresholdMethod: 'psychometric' as const,
     trialCount: 12,

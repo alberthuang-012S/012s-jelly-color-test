@@ -29,9 +29,9 @@ function completionQuality(engine: TestEngineState): number {
     const threshold = estimateThreshold(direction, engine.questions, track)
     const coverage = Math.min(1, track.trialCount / adaptiveConfig.minimumTrials)
     const reversals = Math.min(1, track.reversals.length / adaptiveConfig.targetReversals)
-    const anchors = engine.anchorSlots.filter((slot) => slot.directionId === direction && slot.answered).length / 2
+    const anchors = engine.anchorSlots.filter((slot) => slot.directionId === direction && slot.answered).length / adaptiveConfig.anchorCountPerDirection
     return sum + coverage * 25 + reversals * 25 + (threshold.threshold !== undefined ? 40 : 0) + anchors * 10
-  }, 0) / 3
+  }, 0) / DIRECTION_ORDER.length
 }
 
 export function calculateResultQualityIndex(

@@ -1,12 +1,14 @@
 import { adaptiveConfig, DIRECTION_ORDER } from '../src/psychophysics/config'
 import { generatePlate } from '../src/plate/generator'
 import { runAllSimulationGroups } from '../src/tests/simulation'
+import { createEngineState, questionCountEstimate } from '../src/test/scheduler'
 
 const directions = [...DIRECTION_ORDER]
 const targetNumbers = Array.from({ length: 100 }, (_, number) => number)
 const distances = Array.from({ length: 10 }, (_, index) => adaptiveConfig.minDistance + index * (adaptiveConfig.maxDistance - adaptiveConfig.minDistance) / 9)
 const seeds = [1000, 2000, 3000]
 const totalCases = directions.length * targetNumbers.length * distances.length * seeds.length
+const maximumQuestionCount = questionCountEstimate(createEngineState(1)).maximumTotal
 const started = Date.now()
 let successful = 0
 let productionInvalid = 0
@@ -54,7 +56,7 @@ try {
 const plateElapsedMs = Date.now() - started
 const simulation = runAllSimulationGroups(500)
 console.log(JSON.stringify({
-  engine: 'uv4-proportional-targets',
+  engine: 'uv5-expanded-directions',
   plateValidation: {
     cases: totalCases,
     successful,
@@ -85,7 +87,7 @@ const simulationFailed = simulation.some((group) => !Number.isFinite(group.meanA
   || group.usableRate < 0.9
   || Math.abs(group.bias) > group.configuredThreshold * 0.25
   || group.meanAbsoluteError > group.configuredThreshold * 0.35
-  || group.maxTrialCount > 71)
+  || group.maxTrialCount > maximumQuestionCount)
 if (successful !== totalCases || generationFailures || productionInvalid || coverageFailures || separationFailures || gamutFailures
   || regenerated || substitutionFailures || unsupportedTargetAccepted || reproducibilityFailures || simulationFailed) {
   throw new Error('Measurement regression audit failed')

@@ -4,6 +4,7 @@ import { buildTestSession, readDeviceInfo } from '../test/session'
 import { createEngineState } from '../test/scheduler'
 import { question } from './fixtures'
 import type { TestSession } from '../test/types'
+import { DIRECTION_ORDER } from '../psychophysics/config'
 
 export function reportFixture(): TestSession {
   const session = buildTestSession(createEngineState(1), new Date(0).toISOString(), readDeviceInfo())
@@ -12,8 +13,8 @@ export function reportFixture(): TestSession {
   session.overallDcdt = 0.02
   session.resultQualityIndex = 92
   session.consistencyIndex = 90
-  session.questions = Array.from({ length: 54 }, (_, index) => question({ id: String(index) }))
-  session.metrics.directionalThresholds = ['A', 'B', 'C'].map((id, index) => ({ directionId: id as 'A' | 'B' | 'C', threshold: 0.018 + index * 0.002, thresholdMethod: 'psychometric', trialCount: 18, reversalCount: 7, convergenceQuality: 'high' }))
+  session.questions = Array.from({ length: DIRECTION_ORDER.length * 18 }, (_, index) => question({ id: String(index) }))
+  session.metrics.directionalThresholds = DIRECTION_ORDER.map((directionId, index) => ({ directionId, threshold: 0.018 + index * 0.002, thresholdMethod: 'psychometric' as const, trialCount: 18, reversalCount: 7, convergenceQuality: 'high' as const }))
   return session
 }
 
@@ -25,7 +26,7 @@ describe('report interpretation', () => {
       expect(resultPresentation({ ...session, ...change }).usable).toBe(false)
     }
     session.metrics.directionalThresholds[0].insufficientCalibration = true
-    session.metrics.directionalThresholds[1].threshold = undefined
+    session.metrics.directionalThresholds.slice(1, 4).forEach((threshold) => { threshold.threshold = undefined })
     expect(resultPresentation(session).qualityLabel).toBe('資料不足')
   })
   it('keeps fallback estimates readable without forcing retesting language', () => {

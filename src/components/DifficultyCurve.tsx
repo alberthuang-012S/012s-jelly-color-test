@@ -41,7 +41,7 @@ export function DifficultyCurve({ curve }: DifficultyCurveProps) {
       <div className="band-grid">
         {curve.bands.map((band) => <div key={band.label} className="band-item"><span>{band.label}</span><strong>{band.accuracy.toFixed(1)}%</strong><small>{band.count} trials · session-relative</small></div>)}
       </div>
-      <p className="footnote">曲線為三方向各自擬合後的平均機率，僅供描述，不用來估算整體門檻。X 軸為 nominal Δu′v′，不是實際量測到的面板光譜輸出。</p>
+      <p className="footnote">曲線為各色彩方向各自擬合後的平均機率，僅供描述，不用來估算整體門檻。X 軸為 nominal Δu′v′，不是實際量測到的面板光譜輸出。</p>
     </section>
   )
 }

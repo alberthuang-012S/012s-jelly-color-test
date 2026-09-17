@@ -7,7 +7,7 @@ describe('virtual observer simulation', () => {
     expect(result.validSessions / result.sessions).toBeGreaterThanOrEqual(0.9)
     expect(Math.abs(result.bias)).toBeLessThan(threshold * 0.25)
     expect(result.meanAbsoluteError).toBeLessThan(threshold * 0.35)
-    expect(result.maxTrialCount).toBeLessThanOrEqual(71)
+    expect(result.maxTrialCount).toBeLessThanOrEqual(117)
     expect(result.usableRate).toBeGreaterThanOrEqual(0.9)
     expect(result.convergenceRate).toBeGreaterThanOrEqual(0)
     expect(result.lowConvergenceRate).toBeGreaterThanOrEqual(0)

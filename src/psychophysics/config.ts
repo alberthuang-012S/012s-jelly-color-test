@@ -1,11 +1,13 @@
 import type { ColorDirectionId } from '../test/types'
 
-export const DIRECTION_ORDER: ColorDirectionId[] = ['A', 'B', 'C']
+export const DIRECTION_ORDER: ColorDirectionId[] = ['A', 'B', 'C', 'D', 'E']
 
 export const DIRECTION_LABELS: Record<ColorDirectionId, string> = {
   A: '紅－綠方向',
   B: '綠－紅方向',
   C: '藍－黃方向',
+  D: '紫－綠方向',
+  E: '青－紅方向',
 }
 
 export const adaptiveConfig = {

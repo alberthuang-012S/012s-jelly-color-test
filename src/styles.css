@@ -219,6 +219,8 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .swatch-a { background: linear-gradient(var(--coral), var(--acid)); }
 .swatch-b { background: linear-gradient(var(--acid), var(--coral)); }
 .swatch-c { background: linear-gradient(var(--blue), #f3cf65); }
+.swatch-d { background: linear-gradient(#8d7be8, #9bcf98); }
+.swatch-e { background: linear-gradient(#7fc5d7, #ec8a73); }
 .direction-bar { height: 8px; border-radius: 99px; background: #e6e3dc; overflow: hidden; }
 .direction-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--coral)); }
 .direction-value { text-align: right; font-weight: 800; font-size: 15px; }

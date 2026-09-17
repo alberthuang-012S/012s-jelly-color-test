@@ -21,7 +21,7 @@ export function buildTestSession(engine: TestEngineState, startedAt: string, dev
   const status = engine.status === 'complete' ? (metrics.quality.score < 60 ? 'low-quality' : 'complete') : 'partial'
   return {
     id: `session-${Date.now()}`,
-    engineVersion: 'uv4-proportional-targets',
+    engineVersion: 'uv5-expanded-directions',
     environmentConfirmed: engine.environmentConfirmed === true,
     startedAt,
     completedAt: new Date().toISOString(),

@@ -10,8 +10,16 @@ export interface PaletteResult {
   gamutSafe: boolean
 }
 
-// Display-relative directions, not clinical confusion axes. A/B reverse polarity.
-const AXES = { A: [-0.9, 0.435889894], B: [0.9, -0.435889894], C: [0.4, 0.916515139] } as const
+// Display-relative directions, not clinical confusion axes. A/B reverse polarity;
+// D/E add two complementary chromatic axes while preserving the original three.
+type ColorAxis = readonly [number, number]
+const AXES: Record<ColorDirectionId, ColorAxis> = {
+  A: [-0.9, 0.435889894],
+  B: [0.9, -0.435889894],
+  C: [0.4, 0.916515139],
+  D: [0.707106781, -0.707106781],
+  E: [-0.866025404, -0.5],
+}
 
 export function generatePalette(directionId: ColorDirectionId, requestedDistance: number, seed: number): PaletteResult {
   if (!Number.isFinite(requestedDistance) || requestedDistance < 0.0035 || requestedDistance > 0.075) {

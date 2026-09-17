@@ -5,6 +5,7 @@ import { calculateResultQualityIndex } from './quality'
 import { estimateThreshold, overallThreshold } from './threshold'
 import type {
   DifficultyCurve,
+  ColorDirectionId,
   DirectionThreshold,
   TestEngineState,
   QuestionResult,
@@ -17,7 +18,7 @@ function calculateAccuracy(questions: QuestionResult[]): number {
   return Math.round((valid.filter((question) => question.correct).length / valid.length) * 1000) / 10
 }
 
-function directionAccuracy(questions: QuestionResult[], directionId: string): number {
+function directionAccuracy(questions: QuestionResult[], directionId: ColorDirectionId): number {
   const valid = questions.filter((question) => question.directionId === directionId && question.phase !== 'control')
   if (!valid.length) return 0
   return Math.round((valid.filter((question) => question.correct).length / valid.length) * 1000) / 10
@@ -70,7 +71,7 @@ function buildDifficultyCurve(questions: QuestionResult[]): DifficultyCurve {
   const fits = DIRECTION_ORDER.map((direction) => fitPsychometricCurve(valid.filter((question) => question.phase === 'adaptive' && question.directionId === direction).map((question) => ({ distance: question.nominalDeltaUv as number, correct: question.correct })))).filter((fit) => fit?.converged)
   const min = Math.min(...valid.map((question) => question.nominalDeltaUv as number), 0.004)
   const max = Math.max(...valid.map((question) => question.nominalDeltaUv as number), 0.06)
-  const curve = fits.length === 3
+  const curve = fits.length === DIRECTION_ORDER.length
     ? Array.from({ length: 32 }, (_, index) => {
         const distance = min + ((max - min) * index) / 31
         return { distance, probability: fits.reduce((sum, fit) => sum + fit!.predict(distance), 0) / fits.length }
@@ -86,15 +87,14 @@ export function calculateAllMetrics(engine: TestEngineState): SessionMetrics {
   const overallDcdt = overallThreshold(directionalThresholds)
   const consistency = calculateConsistencyIndex(engine.questions)
   const quality = calculateResultQualityIndex(engine.questions, consistency.score, engine)
+  const directionAccuracyByDirection = Object.fromEntries(
+    DIRECTION_ORDER.map((directionId) => [directionId, directionAccuracy(engine.questions, directionId)]),
+  ) as Record<ColorDirectionId, number>
   return {
     directionalThresholds,
     overallDcdt,
     chromaticAccuracy: calculateAccuracy(engine.questions),
-    directionAccuracy: {
-      A: directionAccuracy(engine.questions, 'A'),
-      B: directionAccuracy(engine.questions, 'B'),
-      C: directionAccuracy(engine.questions, 'C'),
-    },
+    directionAccuracy: directionAccuracyByDirection,
     consistency,
     quality,
     difficultyCurve: buildDifficultyCurve(engine.questions),

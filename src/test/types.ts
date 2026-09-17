@@ -1,4 +1,4 @@
-export type ColorDirectionId = 'A' | 'B' | 'C'
+export type ColorDirectionId = 'A' | 'B' | 'C' | 'D' | 'E'
 export type TestPhase = 'control' | 'calibration' | 'adaptive' | 'anchor'
 export type ThresholdMethod = 'psychometric' | 'reversal-fallback'
 

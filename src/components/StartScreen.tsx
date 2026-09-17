@@ -67,6 +67,8 @@ const previewDirections = [
   { label: '紅－綠方向', value: '0.0184', width: '72%' },
   { label: '綠－紅方向', value: '0.0211', width: '88%' },
   { label: '藍－黃方向', value: '0.0168', width: '61%' },
+  { label: '紫－綠方向', value: '0.0192', width: '76%' },
+  { label: '青－紅方向', value: '0.0204', width: '83%' },
 ]
 
 export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenProps) {

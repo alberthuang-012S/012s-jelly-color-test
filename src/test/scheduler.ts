@@ -12,12 +12,40 @@ import type {
 } from './types'
 
 const NUMBERS = Array.from({ length: 100 }, (_, number) => number)
+const CONTROL_TRIAL_COUNT = 2
+const CALIBRATION_GROWTH_FACTOR = 1.25
 
 export interface QuestionCountEstimate {
   answered: number
   minimumTotal: number
   maximumTotal: number
   exact: boolean
+}
+
+function directionRecord<T>(factory: (directionId: ColorDirectionId) => T): Record<ColorDirectionId, T> {
+  return Object.fromEntries(DIRECTION_ORDER.map((directionId) => [directionId, factory(directionId)])) as Record<ColorDirectionId, T>
+}
+
+function createAnchorSlots(): TestEngineState['anchorSlots'] {
+  const slots: TestEngineState['anchorSlots'] = []
+  for (let anchorIndex = 0; anchorIndex < adaptiveConfig.anchorCountPerDirection; anchorIndex += 1) {
+    const base = anchorIndex === 0 ? 3 : 20 + (anchorIndex - 1) * 12
+    DIRECTION_ORDER.forEach((directionId, directionIndex) => {
+      slots.push({ at: base + directionIndex * 3, directionId, index: anchorIndex, answered: false })
+    })
+  }
+  return slots.sort((first, second) => first.at - second.at)
+}
+
+function calibrationAttemptUpperBound(): number {
+  let distance: number = adaptiveConfig.calibrationStartDistance
+  let attempts = 0
+  while (attempts < 100) {
+    attempts += 1
+    if (distance >= adaptiveConfig.calibrationMaxContrast - 1e-6) return attempts
+    distance = Math.min(adaptiveConfig.calibrationMaxContrast, distance * CALIBRATION_GROWTH_FACTOR)
+  }
+  return attempts
 }
 
 function snapshot(state: TestEngineState['tracks'][ColorDirectionId]): StaircaseSnapshot {
@@ -42,23 +70,12 @@ export function createEngineState(seed = Math.floor(Math.random() * 0x100000000)
     status: 'in-progress',
     controlIndex: 0,
     calibrationCursor: 0,
-    calibrationDistances: { A: adaptiveConfig.calibrationStartDistance, B: adaptiveConfig.calibrationStartDistance, C: adaptiveConfig.calibrationStartDistance },
-    calibrationAttempts: { A: 0, B: 0, C: 0 },
-    calibrationComplete: { A: false, B: false, C: false },
-    calibrationFailed: { A: false, B: false, C: false },
-    tracks: {
-      A: createStaircase('A'),
-      B: createStaircase('B'),
-      C: createStaircase('C'),
-    },
-    anchorSlots: [
-      { at: 3, directionId: 'A', index: 0, answered: false },
-      { at: 6, directionId: 'C', index: 0, answered: false },
-      { at: 9, directionId: 'B', index: 0, answered: false },
-      { at: 20, directionId: 'B', index: 1, answered: false },
-      { at: 22, directionId: 'A', index: 1, answered: false },
-      { at: 24, directionId: 'C', index: 1, answered: false },
-    ],
+    calibrationDistances: directionRecord<number>(() => adaptiveConfig.calibrationStartDistance),
+    calibrationAttempts: directionRecord(() => 0),
+    calibrationComplete: directionRecord(() => false),
+    calibrationFailed: directionRecord(() => false),
+    tracks: directionRecord((directionId) => createStaircase(directionId)),
+    anchorSlots: createAnchorSlots(),
     anchorLevels: {},
     adaptiveTrialCount: 0,
     schedulerCursor: 0,
@@ -286,7 +303,14 @@ export function questionCountEstimate(state: TestEngineState): QuestionCountEsti
   const answered = state.questions.length
   if (state.status === 'complete') return { answered, minimumTotal: answered, maximumTotal: answered, exact: true }
   if (state.phase === 'control' || state.phase === 'calibration') {
-    return { answered, minimumTotal: 41, maximumTotal: 71, exact: false }
+    const directionCount = DIRECTION_ORDER.length
+    const anchorCount = directionCount * adaptiveConfig.anchorCountPerDirection
+    return {
+      answered,
+      minimumTotal: CONTROL_TRIAL_COUNT + directionCount + directionCount * adaptiveConfig.minimumTrials + anchorCount,
+      maximumTotal: CONTROL_TRIAL_COUNT + directionCount * calibrationAttemptUpperBound() + directionCount * adaptiveConfig.maximumTrials + anchorCount,
+      exact: false,
+    }
   }
 
   let minimumRemaining = 0

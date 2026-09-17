@@ -68,7 +68,7 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
 
       <section className="report-reading-note" aria-label="結果閱讀提示">
         <span className="section-kicker">HOW TO READ</span>
-        <p>先看整體 dCDT，再看下方三個色彩方向；方向數值能幫助你理解本次輪廓的差異。</p>
+        <p>先看整體 dCDT，再看下方各個色彩方向；方向數值能幫助你理解本次輪廓的差異。</p>
       </section>
 
       <DirectionProfile thresholds={thresholds} usable={view.usable} />
