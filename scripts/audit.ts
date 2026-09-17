@@ -56,7 +56,7 @@ try {
 const plateElapsedMs = Date.now() - started
 const simulation = runAllSimulationGroups(500)
 console.log(JSON.stringify({
-  engine: 'uv7-glyph-clarity',
+  engine: 'uv8-glyph-clarity-tail',
   plateValidation: {
     cases: totalCases,
     successful,

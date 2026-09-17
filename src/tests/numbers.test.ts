@@ -43,15 +43,25 @@ it('keeps a readable central counter in the 4 mask', () => {
   expect(Math.max(...counterFigureCounts)).toBeLessThanOrEqual(2)
 })
 
-it('keeps the open 5 lower stroke distinct from the closed 6 bowl', () => {
-  const lowerRightDifferences = Array.from({ length: 100 }, (_, index) => {
+it('keeps the lowered 5 tail distinct from the closed 6 bowl', () => {
+  const lowerLeftDifferences = Array.from({ length: 100 }, (_, index) => {
     const seed = 7000 + index
-    const countInLowerRight = (number: number) => buildDotLayout(number, seed).filter((dot) => {
+    const countInLowerLeft = (number: number) => buildDotLayout(number, seed).filter((dot) => {
       const point = singleDigitCoordinates(dot.x, dot.y)
-      return dot.isFigure && point.x >= 0.62 && point.x <= 0.82 && point.y >= 0.46 && point.y <= 0.68
+      return dot.isFigure && point.x >= 0.18 && point.x <= 0.42 && point.y >= 0.68 && point.y <= 0.9
     }).length
-    return countInLowerRight(6) - countInLowerRight(5)
+    return countInLowerLeft(6) - countInLowerLeft(5)
   })
 
-  expect(Math.min(...lowerRightDifferences)).toBeGreaterThanOrEqual(1)
+  expect(Math.min(...lowerLeftDifferences)).toBeGreaterThanOrEqual(1)
+})
+
+it('keeps the 5 tail low enough to reach the lower part of the glyph cell', () => {
+  const tailFigureCounts = Array.from({ length: 100 }, (_, index) => buildDotLayout(5, 7000 + index)
+    .filter((dot) => {
+      const point = singleDigitCoordinates(dot.x, dot.y)
+      return dot.isFigure && point.x >= 0.18 && point.x <= 0.42 && point.y >= 0.82 && point.y <= 0.98
+    }).length)
+
+  expect(Math.min(...tailFigureCounts)).toBeGreaterThanOrEqual(4)
 })
