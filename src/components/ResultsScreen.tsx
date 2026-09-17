@@ -27,34 +27,48 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
   const chromaticAccuracy = Number.isFinite(session.chromaticAccuracy) ? `${session.chromaticAccuracy.toFixed(1)}%` : '資料不足'
   const consistencyIndex = Number.isFinite(session.consistencyIndex) ? session.consistencyIndex : '資料不足'
   const qualityIndex = Number.isFinite(session.resultQualityIndex) ? session.resultQualityIndex : '資料不足'
+  const displayedDcdt = view.usable ? formatDcdt(session.overallDcdt) : view.qualityLabel === '資料不足' ? '尚無法估計' : '目前未列出'
   return (
-    <main className="page-shell results-page readable-report">
+    <main className="page-shell results-page readable-report premium-report">
       <div className="topbar results-topbar">
         <div className="brand-lockup"><span className="brand-dot" /> JELLY COLOR TEST</div>
-        <button className="back-button" onClick={onHistory}>歷史紀錄 →</button>
+        <button className="back-button" type="button" onClick={onHistory}>歷史紀錄 →</button>
       </div>
-      <section className="report-intro" aria-labelledby="result-title">
-        <div className="report-intro-meta"><span className="section-kicker">本次色彩輪廓摘要</span>{isHistorical && <span className="historical-readonly">歷史報告 · 唯讀</span>}<span>已作答 {session.questions.length} 題</span></div>
-        <h1 id="result-title">{view.title}</h1>
-        <p>{view.summary}</p>
-      </section>
-
-      <section className="report-keypoints" aria-label="三項結果重點">
-        <article className="report-keypoint report-keypoint-threshold">
-          <h2>色差辨識門檻</h2>
-          <strong className={view.usable ? 'report-number' : ''}>{view.usable ? formatDcdt(session.overallDcdt) : view.qualityLabel === '資料不足' ? '尚無法估計' : '目前未列出'}</strong>
-          <p>{view.usable ? '相同條件下，越低表示本次能辨認的色差越細微。' : '目前資料未整理整體門檻；可查看下方方向資料。'}</p>
+      <section className="report-hero" aria-labelledby="result-title">
+        <div className="report-hero-copy">
+          <div className="report-intro-meta"><span className="section-kicker">本次色彩輪廓摘要</span>{isHistorical && <span className="historical-readonly">歷史報告 · 唯讀</span>}<span>已作答 {session.questions.length} 題</span></div>
+          <span className="report-hero-overline">PERSONAL COLOR PROFILE</span>
+          <h1 id="result-title">{view.title}</h1>
+          <p className="report-hero-summary">{view.summary}</p>
+          <div className="report-hero-status"><span aria-hidden="true" />測驗完成 · 本頁整理本次相對表現</div>
+        </div>
+        <article className="report-dcdt-card" aria-label="整體 dCDT 結果">
+          <div className="report-card-label"><span>OVERALL</span><strong>dCDT</strong></div>
+          <strong className={`report-dcdt-value${view.usable ? '' : ' report-dcdt-value-text'}`}>{displayedDcdt}</strong>
+          <span className="report-dcdt-unit">nominal Δu′v′</span>
+          <p>{view.usable ? '在相同顯示條件下，數值越低代表本次能辨認的色差越細微。' : '目前未整理整體門檻；已記錄的方向資料保留在下方。'}</p>
           {view.usable && <small>{view.tentative ? '本次方向估計' : '本次相對估計'} · 非百分制分數</small>}
         </article>
-        <article className="report-keypoint">
-          <h2>回答一致程度</h2><strong>{view.stabilityLabel}</strong>
+      </section>
+
+      <section className="report-keypoints report-secondary-metrics" aria-label="回答與資料重點">
+        <article className="report-keypoint report-keypoint-consistency">
+          <div className="report-keypoint-heading"><span className="report-keypoint-icon">CI</span><h2>回答一致程度</h2></div>
+          <strong>{view.stabilityLabel}</strong>
           <p>{view.stabilityLabel === '資料不足' ? '目前回答資料較少。' : view.stabilityLabel === '回答較一致' ? '不同色差與重複題中的回答模式較一致。' : '不同題目的回答模式有差異。'}</p>
-          <small>描述回答模式，不是能力評分</small>
+          <small>回答一致性（CI） · {consistencyIndex} / 100</small>
         </article>
-        <article className={`report-keypoint ${view.usable ? 'report-keypoint-ready' : 'report-keypoint-caution'}`}>
-          <h2>本次結果品質</h2><strong>{view.qualityLabel}</strong><p>{view.qualityReason}</p>
-          <small>綜合作答檢查、一致性與資料完整度</small>
+        <article className={`report-keypoint report-keypoint-quality ${view.usable ? 'report-keypoint-ready' : 'report-keypoint-caution'}`}>
+          <div className="report-keypoint-heading"><span className="report-keypoint-icon">RQI</span><h2>本次資料品質</h2></div>
+          <strong>{view.qualityLabel}</strong>
+          <p>{view.qualityReason}</p>
+          <small>資料品質（RQI） · {qualityIndex} / 100</small>
         </article>
+      </section>
+
+      <section className="report-reading-note" aria-label="結果閱讀提示">
+        <span className="section-kicker">HOW TO READ</span>
+        <p>先看整體 dCDT，再看下方三個色彩方向；方向數值能幫助你理解本次輪廓的差異。</p>
       </section>
 
       <DirectionProfile thresholds={thresholds} usable={view.usable} />
@@ -66,7 +80,7 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
           <div><span>上次 <strong>{formatDcdt(previousSession.overallDcdt)}</strong></span><span aria-hidden="true">→</span><span>本次 <strong>{formatDcdt(session.overallDcdt)}</strong></span></div>
           <p>{sameDisplayedValue ? '兩次顯示值相同。' : session.overallDcdt! < previousSession.overallDcdt! ? '本次估計門檻較低。' : '本次估計門檻較高。'}單次差異不一定代表能力改變，請在相同顯示與光線條件下觀察多次結果。</p>
         </div>}
-        <div className="result-actions"><button className="button button-primary" onClick={onRestart}>再測一次 →</button><button className="button button-quiet" onClick={onHistory}>查看歷史</button></div>
+        <div className="result-actions"><button className="button button-primary" type="button" onClick={onRestart}>再測一次 →</button><button className="button button-quiet" type="button" onClick={onHistory}>查看歷史</button></div>
       </section>
 
       <section className="report-details">

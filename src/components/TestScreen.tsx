@@ -33,6 +33,8 @@ export function TestScreen({ engine, spec, plate, paused, onPause, onResume, onA
   const [locked, setLocked] = useState(false)
   const progress = progressPercent(engine)
   const count = questionCountEstimate(engine)
+  const currentQuestion = Math.min(count.answered + 1, count.maximumTotal)
+  const totalQuestions = count.exact ? `${count.maximumTotal}` : `${count.minimumTotal}–${count.maximumTotal}`
   useEffect(() => setLocked(false), [spec.id])
   const answer = (value: number | null) => {
     if (!canSubmitTrial(paused, locked)) return
@@ -40,22 +42,31 @@ export function TestScreen({ engine, spec, plate, paused, onPause, onResume, onA
     onAnswer(value)
   }
   return (
-    <main className="page-shell test-page">
-      <div className="test-topbar">
+    <main className="page-shell test-page test-lab-page">
+      <header className="test-topbar test-lab-topbar">
         <div className="brand-lockup"><span className="brand-dot" /> JELLY COLOR TEST</div>
-        <div className="test-stage"><span className="stage-dot" /> {phaseLabels[spec.phase]}</div>
-        <div className="test-progress-label" aria-live="polite"><strong>{progressLabels[spec.phase]} · {progress}%</strong><span className="test-progress-secondary">已完成 {count.answered} 題</span></div>
+        <div className="test-session-info">
+          <div className="test-stage"><span className="stage-dot" /> {phaseLabels[spec.phase]}</div>
+          <div className="test-progress-label" aria-live="polite"><strong>{progressLabels[spec.phase]} · {progress}%</strong><span className="test-progress-secondary">第 {currentQuestion} 題 · 共 {totalQuestions} 題</span></div>
+        </div>
         <button className="pause-button" type="button" onClick={paused ? onResume : onPause}>{paused ? '繼續測驗' : '暫停一下'}</button>
-      </div>
+      </header>
       <div className="progress-track" aria-label={`測驗進度 ${progress}%`}><span style={{ width: `${Math.max(4, progress)}%` }} /></div>
       <section className="test-content">
-        <div className="test-instruction"><span className="instruction-number">01</span><div><h1>你看到了什麼數字？</h1><p>仔細觀看圓點，輸入你辨識到的數字。</p></div></div>
-        <div className="plate-frame">{paused ? <div className="pause-panel" role="status"><span className="pause-icon">◌</span><strong>休息一下眼睛</strong><p>準備好後再繼續。這一題會保留不變。</p><button className="button button-primary" type="button" onClick={onResume}>繼續測驗 <span>→</span></button></div> : <PlateCanvas plate={plate} />}</div>
+        <div className="test-instruction">
+          <div className="test-instruction-copy"><span className="instruction-number">{String(currentQuestion).padStart(2, '0')}</span><div><h1>你看到的數字是？</h1><p>仔細觀看色彩圓點，輸入你辨識到的數字。</p></div></div>
+          <div className="test-question-count" aria-live="polite"><small>作答進度</small><strong>{count.answered} <span>/</span> {totalQuestions}</strong><em>{count.exact ? '題' : '預估題數'}</em></div>
+        </div>
+        <div className="plate-column">
+          <div className="plate-frame">{paused ? <div className="pause-panel" role="status"><span className="pause-icon">◌</span><strong>休息一下眼睛</strong><p>準備好後再繼續。這一題會保留不變。</p><button className="button button-primary" type="button" onClick={onResume}>繼續測驗 <span>→</span></button></div> : <PlateCanvas plate={plate} />}</div>
+          <p className="plate-caption">色彩圓點題板 <span aria-hidden="true">·</span> 依目前畫面條件觀察</p>
+        </div>
         <div className="answer-area">
-          <p className="answer-label">輸入你的答案，再按確認送出</p>
-          <p className="answer-help">如果真的看不到數字，不需要猜，直接按「看不出來」。</p>
+          <div className="answer-panel-heading"><div><span className="answer-panel-kicker">ANSWER</span><strong>輸入你看到的數字</strong></div><span className="answer-panel-index">#{currentQuestion}</span></div>
+          <p className="answer-label">輸入答案，再按確認送出</p>
+          <p className="answer-help">看不清楚時，直接按「看不出來」。</p>
           <NumberPad key={spec.id} onAnswer={answer} disabled={locked || paused} />
-          <p className="no-feedback-note">可用數字鍵輸入 · Enter 送出</p>
+          <p className="no-feedback-note">可用鍵盤輸入數字 · Enter 送出</p>
         </div>
       </section>
     </main>
