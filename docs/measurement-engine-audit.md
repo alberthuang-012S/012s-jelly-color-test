@@ -3,12 +3,12 @@
 ## Run metadata
 
 - Date: 2026-09-17 (Asia/Taipei)
-- Engine version: `uv5-expanded-directions`
-- Git SHA under audit: `f7733cd` (full revision is recorded in Git)
+- Engine version: `uv6-bipolar-red-green`
+- Git SHA under audit: `a14d17e8aa755412c3e4bd3ad9ca8de9af25c5dd`
 - Scope: current production `buildTestSession()` engine and current `generatePlate()` generator
 - Result: **PASS — engineering regression gates**
 
-This file describes the current `uv5-expanded-directions` engine. Earlier engine numbers are not carried forward as current-engine evidence.
+This file describes the current `uv6-bipolar-red-green` engine. Earlier engine numbers are not carried forward as current-engine evidence.
 
 ## Commands
 
@@ -25,16 +25,16 @@ The audit command was run from the SHA above with:
 npm run audit
 ```
 
-The full verification run also passed: TypeScript type check, 14 test files / 55 tests, and the production Vite build.
+The full verification run also passed: TypeScript type check, 14 test files / 56 tests, and the production Vite build.
 
 ## Plate validation
 
-The matrix contains 5 color directions × 100 target numbers (0–99) × 10 evenly spaced requested distances × 3 deterministic seed families = **15,000 cases**. Distances include the configured `0.0035` minimum, `0.075` maximum, and eight intermediate values. Each successful case was generated twice and compared as a deterministic seeded plate.
+The matrix contains 4 measurement axes × 100 target numbers (0–99) × 10 evenly spaced requested distances × 3 deterministic seed families = **12,000 cases**. The red–green axis deterministically alternates its two polarities; the other axes cover blue–yellow, purple–green and cyan–red. Distances include the configured `0.0035` minimum, `0.075` maximum, and eight intermediate values. Each successful case was generated twice and compared as a deterministic seeded plate.
 
 | Check | Result |
 | --- | ---: |
-| Generation success | 15,000 / 15,000 (100%) |
-| `productionValid` | 15,000 / 15,000 (100%) |
+| Generation success | 12,000 / 12,000 (100%) |
+| `productionValid` | 12,000 / 12,000 (100%) |
 | Coverage failures | 0 |
 | Figure/background separation failures | 0 |
 | Out-of-gamut / invalid RGB failures | 0 |
@@ -47,19 +47,19 @@ The matrix contains 5 color directions × 100 target numbers (0–99) × 10 even
 
 ## Virtual-observer regression
 
-Each group contains 500 deterministic sessions. The observer uses the existing open-response simulation philosophy: logistic probability in log nominal distance, slope 4, 75% correct at the configured threshold, and no 50% guessing floor. “Usable” is the existing result-eligibility concept: at least two finite direction estimates, complete data, and RQI ≥ 60. Convergence is reported separately; reaching the 18-trial ceiling remains low convergence and is not reclassified as convergence.
+Each group contains 500 deterministic sessions. The observer uses the existing open-response simulation philosophy: logistic probability in log nominal distance, slope 4, 75% correct at the configured threshold, and no 50% guessing floor. “Usable” is the existing result-eligibility concept: at least two finite direction estimates, complete data, and RQI ≥ 60. Convergence is reported separately; reaching the 14-trial ceiling remains low convergence and is not reclassified as convergence.
 
 | Configured threshold | Usable rate | Median estimate | Bias | MAE | Mean trials | Median trials | Min–max trials | Convergence | Low convergence | Psychometric fit | Reversal fallback | Failed calibration |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 0.010 | 500/500 (100%) | 0.009852 | -0.000148 | 0.001024 | 106.848 | 107 | 104–108 | 0/500 (0%) | 500/500 (100%) | 75.27% | 24.73% | 0/500 (0%) |
-| 0.020 | 500/500 (100%) | 0.020068 | +0.000068 | 0.001561 | 106.462 | 107 | 102–108 | 0/500 (0%) | 500/500 (100%) | 88.92% | 11.08% | 0/500 (0%) |
-| 0.040 | 500/500 (100%) | 0.038872 | -0.001128 | 0.002357 | 105.374 | 106 | 96–110 | 1/500 (0.2%) | 499/500 (99.8%) | 94.95% | 5.05% | 0/500 (0%) |
+| 0.010 | 500/500 (100%) | 0.011894 | +0.001894 | 0.001839 | 69.810 | 70 | 68–71 | 1/500 (0.2%) | 499/500 (99.8%) | 41.52% | 58.48% | 0/500 (0%) |
+| 0.020 | 500/500 (100%) | 0.020357 | +0.000357 | 0.001891 | 69.350 | 70 | 63–71 | 0/500 (0%) | 500/500 (100%) | 79.29% | 20.71% | 0/500 (0%) |
+| 0.040 | 500/500 (100%) | 0.039017 | -0.000983 | 0.002581 | 67.718 | 68 | 59–73 | 17/500 (3.4%) | 483/500 (96.6%) | 87.88% | 12.12% | 0/500 (0%) |
 
-Directional estimate counts were 2,499, 2,499 and 2,497 in the three groups. Fit/fallback percentages are usage across those estimates. Existing audit gates were retained: usable estimate rate ≥ 90%, absolute median bias ≤ 25% of configured threshold, MAE ≤ 35%, and maximum session length ≤ 117 trials. The audit additionally requires the five-direction plate matrix to complete with zero validation, substitution, regeneration, gamut, and reproducibility failures. All gates passed.
+Directional estimate counts were 1,939, 1,912 and 1,981 in the three groups. Fit/fallback percentages are usage across those estimates. Existing audit gates were retained: usable estimate rate ≥ 90%, absolute median bias ≤ 25% of configured threshold, MAE ≤ 35%, and maximum session length ≤ 78 trials. The audit additionally requires the four-axis plate matrix to complete with zero validation, substitution, regeneration, gamut, and reproducibility failures. All gates passed. The shorter ceiling increases the use of reversal fallback, especially at the lowest configured threshold; that trade-off is retained in the record rather than hidden.
 
 ## What was not changed
 
-This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/maximum distances, color space, palette validation, and dCDT/CA/CI/RQI formulas. It adds two display-relative color axes (purple–green and cyan–red), expands calibration, interleaving, anchors and per-direction metrics to five directions, and bumps the engine version so earlier three-direction results remain readable but are not compared with the new engine.
+This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/maximum distances, color space, palette validation, and dCDT/CA/CI/RQI formulas. It treats red–green as one bipolar axis with deterministic polarity switching, retains blue–yellow, and adds purple–green and cyan–red. It shortens each axis to 10–14 adaptive trials with a five-reversal stopping target, keeps paired anchors, and bumps the engine version so earlier three-direction and five-direction results remain readable but are not compared with the new engine.
 
 ## Limitations
 
@@ -67,6 +67,6 @@ This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/m
 - The environment checklist records user confirmation only; lighting and physical monitor calibration are not measured automatically.
 - No clinical validation, population norm, percentile, diagnosis, or normal/abnormal range is established.
 - Virtual observers cover one response model and do not establish real-user accuracy, lapse/guess behavior, device equivalence, confidence intervals, or empirical repeatability.
-- The current 18-trial stopping rule produces a high low-convergence rate in this simulation. That is reported honestly; low convergence is not silently promoted to a convergence claim, and the existing audit gates were not weakened to hide it.
-- A/B are opposite color polarities; C/D/E are display-relative supplemental directions rather than clinical confusion axes.
+- The current 14-trial stopping rule produces a high low-convergence rate and more reversal fallbacks in this simulation. That is reported honestly; low convergence is not silently promoted to a convergence claim, and the existing audit gates were not weakened to hide it.
+- The red–green axis alternates its two polarities; blue–yellow, purple–green and cyan–red are display-relative supplemental directions rather than clinical confusion axes.
 - The audit is a software regression check, not evidence that the measurement is clinically valid.
