@@ -24,28 +24,12 @@ const ambientDots: DotPoint[] = Array.from({ length: 156 }, (_, index) => {
   }
 })
 
-const hiddenBrandPatterns = [
-  ['01110', '10001', '10001', '10101', '10001', '10001', '01110'],
-  ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
-  ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
-  ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
-]
-
-const digitOffsets = [
-  { left: 0.6, top: 1.2 },
-  { left: 2.6, top: 3.1 },
-  { left: 1.4, top: 4.8 },
-]
-
-const hiddenBrandDots = hiddenBrandPatterns.flatMap((rows, digitIndex) => rows.flatMap((row, rowIndex) => [...row].flatMap((cell, columnIndex) => {
-  if (cell !== '1') return []
-  return digitOffsets.map((offset, offsetIndex) => ({
-    left: `${9.5 + digitIndex * 21.4 + columnIndex * 3.8 + offset.left}%`,
-    top: `${27 + rowIndex * 6.1 + offset.top}%`,
-    size: `${3.5 + ((digitIndex + rowIndex + columnIndex + offsetIndex) % 3)}px`,
-    delay: `${((digitIndex * 4 + rowIndex + offsetIndex) % 10) * -0.6}s`,
-  }))
-})))
+const sampleFields = [
+  { label: '0', tone: 'violet', code: '01' },
+  { label: '1', tone: 'periwinkle', code: '02' },
+  { label: '2', tone: 'coral', code: '03' },
+  { label: 'S', tone: 'lilac', code: '04' },
+] as const
 
 function HeroDotVisual() {
   return (
@@ -64,11 +48,12 @@ function HeroDotVisual() {
             key={`ambient-${index}`}
             style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
           />)}
-          {hiddenBrandDots.map((dot, index) => <span
-            className="start-dot start-dot-digit"
-            key={`digit-${index}`}
-            style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
-          />)}
+          <div className="start-visual-samples">
+            {sampleFields.map((sample) => <div className={`start-visual-sample start-visual-sample-${sample.tone}`} key={sample.label}>
+              <span className="start-sample-field"><span className="start-sample-glyph">{sample.label}</span></span>
+              <span className="start-sample-code">FIELD {sample.code}</span>
+            </div>)}
+          </div>
           <span className="start-visual-focus" />
         </div>
       </div>

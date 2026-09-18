@@ -1079,3 +1079,92 @@ body { background: var(--paper); }
   .start-visual-field-code { right: 18px; bottom: 18px; font-size: 6px; }
   .start-visual-meta { margin-top: 11px; font-size: 8px; }
 }
+
+/* Homepage visual: four clean color samples for the 012S mark. */
+.start-visual-samples {
+  position: absolute;
+  z-index: 6;
+  top: 29%;
+  right: 8%;
+  left: 8%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(7px, 1.2vw, 14px);
+}
+.start-visual-sample {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 6px 10px;
+  border: 1px solid rgba(118, 102, 214, .13);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .72);
+  box-shadow: 0 10px 20px rgba(76, 66, 125, .06), inset 0 0 0 1px rgba(255, 255, 255, .42);
+}
+.start-sample-field {
+  position: relative;
+  display: grid;
+  width: clamp(52px, 6.4vw, 76px);
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--sample-line);
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 29%, rgba(255, 255, 255, .96), var(--sample-wash) 56%, rgba(255, 255, 255, .66) 100%);
+  box-shadow: inset 0 0 0 5px rgba(255, 255, 255, .3), 0 5px 12px rgba(76, 66, 125, .08);
+}
+.start-sample-field::before {
+  content: '';
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 18% 24%, var(--sample-color) 0 2px, transparent 2.7px),
+    radial-gradient(circle at 78% 20%, var(--sample-color) 0 1.5px, transparent 2.3px),
+    radial-gradient(circle at 28% 70%, var(--sample-color) 0 1.5px, transparent 2.3px),
+    radial-gradient(circle at 77% 72%, var(--sample-color) 0 2px, transparent 2.7px),
+    radial-gradient(circle at 50% 11%, var(--sample-color) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 50% 89%, var(--sample-color) 0 1px, transparent 1.8px);
+  opacity: .58;
+}
+.start-sample-field::after {
+  content: '';
+  position: absolute;
+  inset: 23%;
+  border: 1px dotted var(--sample-line);
+  border-radius: 50%;
+}
+.start-sample-glyph {
+  position: relative;
+  z-index: 2;
+  color: var(--sample-color);
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.5vw, 30px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.08em;
+  text-shadow: 0 2px 8px rgba(76, 66, 125, .13);
+}
+.start-sample-code {
+  overflow: hidden;
+  max-width: 100%;
+  color: rgba(76, 66, 125, .5);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  white-space: nowrap;
+}
+.start-visual-sample-violet { --sample-color: #7565d6; --sample-wash: rgba(182, 172, 246, .42); --sample-line: rgba(117, 101, 214, .23); }
+.start-visual-sample-periwinkle { --sample-color: #718fda; --sample-wash: rgba(179, 198, 246, .42); --sample-line: rgba(113, 143, 218, .23); }
+.start-visual-sample-coral { --sample-color: #c9859b; --sample-wash: rgba(240, 204, 214, .5); --sample-line: rgba(201, 133, 155, .24); }
+.start-visual-sample-lilac { --sample-color: #9b77bd; --sample-wash: rgba(218, 194, 235, .48); --sample-line: rgba(155, 119, 189, .24); }
+
+@media (max-width: 760px) {
+  .start-visual-samples { top: 30%; right: 5%; left: 5%; gap: 4px; }
+  .start-visual-sample { gap: 5px; padding: 7px 3px 6px; border-radius: 13px; }
+  .start-sample-field { width: clamp(42px, 13vw, 58px); }
+  .start-sample-glyph { font-size: 18px; }
+  .start-sample-code { font-size: 5px; letter-spacing: .08em; }
+}
