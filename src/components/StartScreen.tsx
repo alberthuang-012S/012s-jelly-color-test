@@ -1,4 +1,4 @@
-import { HomepagePlate012S } from './HomepagePlate012S'
+import homeHero012S from '../assets/home-hero-012s.png'
 
 interface StartScreenProps {
   onStart: () => void
@@ -47,12 +47,10 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
           <button className="button start-primary-cta" type="button" onClick={onStart}>開始測驗 <span aria-hidden="true">→</span></button>
           <p className="start-note"><span className="start-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M12 7v5l3.3 2" /></svg></span>約 3–5 分鐘・動態調整難度</p>
         </div>
-        <div className="start-hero-visual" aria-hidden="true">
-          <span className="start-visual-orbit start-visual-orbit-large" />
-          <span className="start-visual-orbit start-visual-orbit-small" />
-          <span className="start-visual-bubble start-visual-bubble-top" />
-          <span className="start-visual-bubble start-visual-bubble-bottom" />
-          <HomepagePlate012S />
+        <div className="start-visual" aria-hidden="true">
+          <div className="start-hero-art">
+            <img className="start-hero-art-image" src={homeHero012S} alt="" />
+          </div>
         </div>
       </section>
 
