@@ -24,9 +24,11 @@ const ambientDots: DotPoint[] = Array.from({ length: 156 }, (_, index) => {
   }
 })
 
-const hiddenDigitPatterns = [
-  ['11110', '10001', '10000', '11110', '00001', '00001', '10001', '01110'],
-  ['01110', '10001', '10001', '01110', '10001', '10001', '10001', '01110'],
+const hiddenBrandPatterns = [
+  ['01110', '10001', '10001', '10101', '10001', '10001', '01110'],
+  ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+  ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+  ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
 ]
 
 const digitOffsets = [
@@ -35,11 +37,11 @@ const digitOffsets = [
   { left: 1.4, top: 4.8 },
 ]
 
-const hiddenDigitDots = hiddenDigitPatterns.flatMap((rows, digitIndex) => rows.flatMap((row, rowIndex) => [...row].flatMap((cell, columnIndex) => {
+const hiddenBrandDots = hiddenBrandPatterns.flatMap((rows, digitIndex) => rows.flatMap((row, rowIndex) => [...row].flatMap((cell, columnIndex) => {
   if (cell !== '1') return []
   return digitOffsets.map((offset, offsetIndex) => ({
-    left: `${24 + digitIndex * 30 + columnIndex * 4.6 + offset.left}%`,
-    top: `${21 + rowIndex * 6.8 + offset.top}%`,
+    left: `${9.5 + digitIndex * 21.4 + columnIndex * 3.8 + offset.left}%`,
+    top: `${27 + rowIndex * 6.1 + offset.top}%`,
     size: `${3.5 + ((digitIndex + rowIndex + columnIndex + offsetIndex) % 3)}px`,
     delay: `${((digitIndex * 4 + rowIndex + offsetIndex) % 10) * -0.6}s`,
   }))
@@ -62,7 +64,7 @@ function HeroDotVisual() {
             key={`ambient-${index}`}
             style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
           />)}
-          {hiddenDigitDots.map((dot, index) => <span
+          {hiddenBrandDots.map((dot, index) => <span
             className="start-dot start-dot-digit"
             key={`digit-${index}`}
             style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
