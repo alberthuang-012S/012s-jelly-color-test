@@ -25,8 +25,11 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
     <main className="page-shell start-page">
       <header className="start-header">
         <div className="start-brand">
-          <strong>2050 × 012S</strong>
-          <span>色彩辨識測驗</span>
+          <span className="start-brand-mark" aria-hidden="true"><i /><i /></span>
+          <div className="start-brand-copy">
+            <strong>2050 × 012S</strong>
+            <span>色彩辨識測驗</span>
+          </div>
         </div>
         <div className="start-header-tools">
           <button className="start-history-button" type="button" onClick={onHistory}>歷史紀錄{sessionCount > 0 && <span className="start-history-count">{sessionCount}</span>}</button>
@@ -34,7 +37,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
         </div>
       </header>
 
-      <section className="start-hero" aria-labelledby="start-title">
+      <section className="start-hero" id="start-intro" aria-labelledby="start-title">
         <div className="start-hero-copy">
           <p className="start-kicker">SAME DOTS, DIFFERENT WORLDS.</p>
           <h1 id="start-title"><span>看見顏色之間</span><span>的<strong>微小差異</strong></span></h1>
@@ -42,25 +45,29 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
         </div>
         <div className="start-hero-actions">
           <button className="button start-primary-cta" type="button" onClick={onStart}>開始測驗 <span aria-hidden="true">→</span></button>
-          <p className="start-note"><span className="start-note-mark" aria-hidden="true" />核心快速版約 28–40 題・3–5 分鐘・動態調整難度</p>
+          <p className="start-note"><span className="start-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M12 7v5l3.3 2" /></svg></span>約 3–5 分鐘・動態調整難度</p>
         </div>
         <div className="start-hero-visual" aria-hidden="true">
+          <span className="start-visual-orbit start-visual-orbit-large" />
+          <span className="start-visual-orbit start-visual-orbit-small" />
+          <span className="start-visual-bubble start-visual-bubble-top" />
+          <span className="start-visual-bubble start-visual-bubble-bottom" />
           <HomepagePlate012S />
         </div>
       </section>
 
-      <section className="start-feature-grid" aria-label="測驗特色">
+      <section className="start-feature-grid" id="start-features" aria-label="測驗特色">
         <article className="start-feature-card">
-          <span className="start-feature-icon"><FeatureIcon name="adjust" /></span>
-          <div><h2>自動調整難度</h2><p>依你的回答動態調整色彩差異，找到適合你的挑戰難度。</p></div>
+          <span className="start-feature-icon" aria-hidden="true"><FeatureIcon name="adjust" /></span>
+          <div><h2>自動調整難度</h2><p>依你的回答，動態調整色彩差異。</p></div>
         </article>
         <article className="start-feature-card">
-          <span className="start-feature-icon"><FeatureIcon name="profile" /></span>
-          <div><h2>建立辨識輪廓</h2><p>完成測驗後，查看不同色彩方向的辨識表現。</p></div>
+          <span className="start-feature-icon" aria-hidden="true"><FeatureIcon name="profile" /></span>
+          <div><h2>建立辨識輪廓</h2><p>完成測驗後，了解自己的辨識特徵。</p></div>
         </article>
         <article className="start-feature-card">
-          <span className="start-feature-icon"><FeatureIcon name="history" /></span>
-          <div><h2>保留歷史紀錄</h2><p>保存每次測驗結果，方便之後比較變化。</p></div>
+          <span className="start-feature-icon" aria-hidden="true"><FeatureIcon name="history" /></span>
+          <div><h2>保留歷史紀錄</h2><p>追蹤每次測驗，看見辨識變化。</p></div>
         </article>
       </section>
     </main>
