@@ -516,18 +516,13 @@ body { background: var(--paper); }
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
-.start-header-cta,
 .start-primary-cta {
   background: var(--home-purple);
   color: #fff;
   box-shadow: 0 11px 24px rgba(103, 82, 220, .18);
 }
-.start-header-cta { padding: 12px 18px; font-size: 12px; }
-.start-header-cta span,
 .start-primary-cta span { margin-left: 12px; font-size: 16px; transition: transform .2s ease; }
-.start-header-cta:hover,
 .start-primary-cta:hover { background: #7562e4; }
-.start-header-cta:hover span,
 .start-primary-cta:hover span { transform: translateX(3px); }
 .start-hero {
   min-height: min(680px, calc(100svh - 188px));
@@ -560,32 +555,6 @@ body { background: var(--paper); }
 .start-visual { grid-column: 2; grid-row: 1 / span 2; min-width: 0; display: grid; place-items: center; }
 .start-hero-art { width: min(48vw, 680px); margin: 0 auto; }
 .start-hero-art-image { display: block; width: 100%; height: auto; object-fit: contain; mix-blend-mode: normal; filter: drop-shadow(0 12px 22px rgba(85, 74, 147, .055)); }
-.start-feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 0 0 44px; }
-.start-feature-card {
-  min-height: 126px;
-  display: flex;
-  align-items: flex-start;
-  gap: 18px;
-  padding: 24px 26px;
-  border: 1px solid var(--home-line);
-  border-radius: 20px;
-  background: var(--home-card);
-  box-shadow: 0 16px 34px rgba(66, 58, 105, .06);
-}
-.start-feature-icon {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
-  border-radius: 50%;
-  background: var(--home-purple-soft);
-  color: var(--home-purple);
-}
-.start-feature-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
-.start-feature-card h2 { margin: 2px 0 8px; color: var(--home-ink); font-size: 17px; letter-spacing: -.03em; }
-.start-feature-card p { margin: 0; color: var(--home-muted); font-size: 12px; line-height: 1.65; }
-
 @media (max-width: 1000px) {
   .start-page { width: min(100% - 48px, 720px); }
   .start-hero { min-height: auto; grid-template-columns: 1fr; grid-template-rows: auto auto auto; padding: 68px 0 42px; }
@@ -601,7 +570,6 @@ body { background: var(--paper); }
   .start-brand strong { font-size: 19px; }
   .start-brand-copy span { font-size: 9px; }
   .start-header-tools { gap: 12px; }
-  .start-header-cta { display: none; }
   .start-history-button { padding: 8px 0; font-size: 12px; }
   .start-hero { padding: 50px 0 34px; }
   .start-kicker { font-size: 9px; }
@@ -612,10 +580,6 @@ body { background: var(--paper); }
   .start-note { align-items: flex-start; margin-top: 16px; font-size: 10px; }
   .start-visual { margin-top: 25px; }
   .start-hero-art { width: min(92vw, 520px); max-width: 100%; }
-  .start-feature-grid { grid-template-columns: 1fr; gap: 10px; padding-bottom: 24px; }
-  .start-feature-card { min-height: 0; padding: 16px 17px; border-radius: 18px; }
-  .start-feature-card h2 { font-size: 14px; }
-  .start-feature-card p { font-size: 11px; }
 }
 
 /* Test screen: keep the stimulus and the answer controls in one visual field. */
