@@ -12,7 +12,8 @@ export interface PaletteResult {
 }
 
 // Display-relative directions, not clinical confusion axes. A/B reverse polarity;
-// D/E add two complementary chromatic axes while preserving the original three.
+// E is retained for legacy sessions. F/G/H add optional axes with different
+// chromatic pairings so the new picker is not anchored to another red axis.
 type ColorAxis = readonly [number, number]
 type FixedAxisId = Exclude<ColorDirectionId, 'RG'>
 const AXES: Record<FixedAxisId, ColorAxis> = {
@@ -21,6 +22,9 @@ const AXES: Record<FixedAxisId, ColorAxis> = {
   C: [0.4, 0.916515139],
   D: [0.707106781, -0.707106781],
   E: [-0.866025404, -0.5],
+  F: [0.939692621, 0.342020143],
+  G: [0, 1],
+  H: [1, 0],
 }
 
 function axisFor(directionId: ColorDirectionId, seed: number): { axisId: FixedAxisId; axis: ColorAxis; polarityId?: ColorPolarityId } {

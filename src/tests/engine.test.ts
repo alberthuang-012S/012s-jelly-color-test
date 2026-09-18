@@ -75,17 +75,17 @@ describe('measurement engine invariants', () => {
     expect(Object.keys(state.tracks)).toEqual(['D'])
     expect(questionCountEstimate(state)).toMatchObject({ minimumTotal: 15, maximumTotal: 21, exact: false })
     expect(selectNextTrial(state)?.directionId).toBeUndefined()
-    expect(OPTIONAL_DIRECTION_ORDER).toContain('D')
+    expect(OPTIONAL_DIRECTION_ORDER).toEqual(['D', 'F', 'G', 'H'])
   })
 
   it('completes a selected supplemental direction independently', () => {
-    let state = createEngineState(4321, true, 'supplemental', ['E'])
+    let state = createEngineState(4321, true, 'supplemental', ['F'])
     for (let guard = 0; guard < 80 && state.status === 'in-progress'; guard++) {
       const { spec, plate } = next(state)
       state = recordTrial(state, spec, spec.targetNumber, 800, false, plate)
     }
     expect(state.status).toBe('complete')
-    expect(state.questions.filter((item) => item.phase !== 'control').every((item) => item.directionId === 'E')).toBe(true)
+    expect(state.questions.filter((item) => item.phase !== 'control').every((item) => item.directionId === 'F')).toBe(true)
     expect(state.questions.length).toBeGreaterThanOrEqual(15)
     expect(state.questions.length).toBeLessThanOrEqual(21)
   })

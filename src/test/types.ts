@@ -1,4 +1,4 @@
-export type ColorDirectionId = 'A' | 'B' | 'C' | 'D' | 'E' | 'RG'
+export type ColorDirectionId = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'RG'
 export type ColorPolarityId = 'A' | 'B'
 export type TestPhase = 'control' | 'calibration' | 'adaptive' | 'anchor'
 export type TestMode = 'core' | 'supplemental'

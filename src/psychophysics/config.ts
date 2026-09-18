@@ -1,10 +1,10 @@
 import type { ColorDirectionId } from '../test/types'
 
-// A/B are retained for reading legacy sessions. The quick professional
+// A/B/E are retained for reading legacy sessions. The quick professional
 // session uses the bipolar red-green axis and blue-yellow axis. The remaining
 // display-relative axes are available as optional follow-up measurements.
 export const DIRECTION_ORDER: ColorDirectionId[] = ['RG', 'C']
-export const OPTIONAL_DIRECTION_ORDER: ColorDirectionId[] = ['D', 'E']
+export const OPTIONAL_DIRECTION_ORDER: ColorDirectionId[] = ['D', 'F', 'G', 'H']
 export const ALL_DIRECTION_ORDER: ColorDirectionId[] = [...DIRECTION_ORDER, ...OPTIONAL_DIRECTION_ORDER]
 
 export const DIRECTION_LABELS: Record<ColorDirectionId, string> = {
@@ -12,7 +12,10 @@ export const DIRECTION_LABELS: Record<ColorDirectionId, string> = {
   B: '綠－紅方向',
   C: '藍－黃方向',
   D: '紫－綠方向',
-  E: '青－紅方向',
+  E: '青－紅方向（舊版）',
+  F: '珊瑚－青藍方向',
+  G: '黃綠－紫藍方向',
+  H: '玫瑰－青綠方向',
   RG: '紅－綠雙向軸',
 }
 

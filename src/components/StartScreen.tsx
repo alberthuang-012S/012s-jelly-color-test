@@ -125,7 +125,7 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
             </div>)}
           </div>
         </div>
-        <p className="start-preview-note">核心快速版聚焦紅綠與藍黃；紫綠、青紅可在結果頁自行選擇補充測驗。</p>
+        <p className="start-preview-note">核心快速版聚焦紅綠與藍黃；完成後可在結果頁從多種色彩組合中選擇補充測驗。</p>
       </section>
 
       <section className="start-section start-statement" aria-labelledby="start-statement-title">

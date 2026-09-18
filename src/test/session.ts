@@ -21,7 +21,7 @@ export function buildTestSession(engine: TestEngineState, startedAt: string, dev
   const status = engine.status === 'complete' ? (metrics.quality.score < 60 ? 'low-quality' : 'complete') : 'partial'
   return {
     id: `session-${Date.now()}`,
-    engineVersion: 'uv9-quick-core-optional',
+    engineVersion: 'uv10-quick-core-multi-optional',
     testMode: engine.mode,
     directionOrder: engine.directionOrder,
     parentSessionId: engine.parentSessionId,

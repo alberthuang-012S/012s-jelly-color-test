@@ -222,6 +222,9 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .swatch-c { background: linear-gradient(var(--blue), #f3cf65); }
 .swatch-d { background: linear-gradient(#8d7be8, #9bcf98); }
 .swatch-e { background: linear-gradient(#7fc5d7, #ec8a73); }
+.swatch-f { background: linear-gradient(#e5a083, #82c0c5); }
+.swatch-g { background: linear-gradient(#b8bd77, #9186ca); }
+.swatch-h { background: linear-gradient(#d890a5, #80bdb2); }
 .direction-bar { height: 8px; border-radius: 99px; background: #e6e3dc; overflow: hidden; }
 .direction-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--coral)); }
 .direction-value { text-align: right; font-weight: 800; font-size: 15px; }
@@ -948,6 +951,7 @@ body { background: var(--paper); }
 .supplemental-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 17px; }
 .supplemental-option { display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 13px; background: #fff; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease; }
 .supplemental-option:hover { border-color: var(--blue); transform: translateY(-1px); }
+.supplemental-option:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 .supplemental-option .direction-swatch { flex: 0 0 auto; width: 10px; height: 24px; }
 .supplemental-option > span:nth-child(2) { min-width: 0; font-size: 12px; font-weight: 750; }
 .supplemental-option > strong { margin-left: auto; color: var(--blue); font-size: 17px; font-weight: 500; }

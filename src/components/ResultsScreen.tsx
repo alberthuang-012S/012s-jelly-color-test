@@ -7,6 +7,8 @@ import { canCompareResults, hasThreshold, resultPresentation } from '../test/rep
 import { DIRECTION_LABELS, OPTIONAL_DIRECTION_ORDER } from '../psychophysics/config'
 import type { ColorDirectionId, TestSession } from '../test/types'
 
+const MAX_SUPPLEMENTAL_SELECTIONS = 2
+
 interface ResultsScreenProps {
   session: TestSession
   previousSession?: TestSession
@@ -39,7 +41,11 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
   useEffect(() => setSelectedSupplemental([]), [session.id])
 
   const toggleSupplemental = (directionId: ColorDirectionId) => {
-    setSelectedSupplemental((current) => current.includes(directionId) ? current.filter((item) => item !== directionId) : [...current, directionId])
+    setSelectedSupplemental((current) => {
+      if (current.includes(directionId)) return current.filter((item) => item !== directionId)
+      if (current.length >= MAX_SUPPLEMENTAL_SELECTIONS) return current
+      return [...current, directionId]
+    })
   }
 
   const startSupplemental = () => {
@@ -95,12 +101,13 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
         <ul className="report-suggestions">{view.suggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}</ul>
 
         {!isHistorical && !view.isSupplemental && onStartSupplemental && <section className="supplemental-picker" aria-labelledby="supplemental-picker-title">
-          <div className="supplemental-picker-heading"><div><span className="section-kicker">OPTIONAL DIRECTIONS</span><h3 id="supplemental-picker-title">想再看看其他色彩方向？</h3></div><span className="supplemental-picker-count">可複選</span></div>
-          <p>核心快速版已完成紅綠與藍黃。你可以從下面選擇紫綠、青紅，另外建立補充方向紀錄。</p>
+          <div className="supplemental-picker-heading"><div><span className="section-kicker">OPTIONAL DIRECTIONS</span><h3 id="supplemental-picker-title">想再看看其他色彩方向？</h3></div><span className="supplemental-picker-count">最多 2 組</span></div>
+          <p>核心快速版已完成紅綠與藍黃。你可以從下面選擇其他色彩組合，另外建立補充方向紀錄；每次最多選兩組，保持測量簡短。</p>
           <div className="supplemental-options" role="group" aria-label="選擇補充色彩方向">
             {OPTIONAL_DIRECTION_ORDER.map((directionId) => {
               const selected = selectedSupplemental.includes(directionId)
-              return <button className={`supplemental-option${selected ? ' supplemental-option-selected' : ''}`} type="button" key={directionId} aria-pressed={selected} onClick={() => toggleSupplemental(directionId)}>
+              const selectionLimitReached = !selected && selectedSupplemental.length >= MAX_SUPPLEMENTAL_SELECTIONS
+              return <button className={`supplemental-option${selected ? ' supplemental-option-selected' : ''}`} type="button" key={directionId} aria-pressed={selected} disabled={selectionLimitReached} onClick={() => toggleSupplemental(directionId)}>
                 <span className={`direction-swatch swatch-${directionId.toLowerCase()}`} aria-hidden="true" /><span>{DIRECTION_LABELS[directionId]}</span><strong aria-hidden="true">{selected ? '✓' : '+'}</strong>
               </button>
             })}

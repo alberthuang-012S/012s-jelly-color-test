@@ -10,7 +10,7 @@ const seeds = [1000, 2000, 3000]
 const totalCases = directions.length * targetNumbers.length * distances.length * seeds.length
 const coreQuestionRange = questionCountEstimate(createEngineState(1))
 const supplementalOneQuestionRange = questionCountEstimate(createEngineState(1, true, 'supplemental', ['D']))
-const supplementalTwoQuestionRange = questionCountEstimate(createEngineState(1, true, 'supplemental', ['D', 'E']))
+const supplementalTwoQuestionRange = questionCountEstimate(createEngineState(1, true, 'supplemental', ['D', 'F']))
 const maximumQuestionCount = coreQuestionRange.maximumTotal
 const started = Date.now()
 let successful = 0
@@ -59,7 +59,7 @@ try {
 const plateElapsedMs = Date.now() - started
 const simulation = runAllSimulationGroups(500)
 console.log(JSON.stringify({
-  engine: 'uv9-quick-core-optional',
+  engine: 'uv10-quick-core-multi-optional',
   questionRanges: {
     core: coreQuestionRange,
     supplementalOneDirection: supplementalOneQuestionRange,
