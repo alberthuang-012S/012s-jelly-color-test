@@ -29,7 +29,7 @@ The full verification run also passed: TypeScript type check, 14 test files / 64
 
 ## Question ranges
 
-The default core session measures red-green bipolar and blue-yellow directions. Purple-green, coral-blue-green, yellow-green-violet-blue and rose-teal are selected later from the core report and saved as separate supplemental sessions. The new picker offers four optional combinations and limits each supplemental run to at most two selected directions.
+The default core session measures red-green bipolar and blue-yellow directions. Purple-green, red-orange-blue-green, yellow-green-blue-violet and red-violet-blue-green are selected later from the core report and saved as separate supplemental sessions. The new picker offers four optional combinations and limits each supplemental run to at most two selected directions.
 
 | Session mode | Initial lower bound | Initial upper bound |
 | --- | ---: | ---: |
@@ -41,7 +41,7 @@ The bounds include 2 control trials, per-direction calibration, 10–14 adaptive
 
 ## Plate validation
 
-The matrix contains 6 active measurement axes × 100 target numbers (0–99) × 10 evenly spaced requested distances × 3 deterministic seed families = **18,000 cases**. The red–green axis deterministically alternates its two polarities; the other active axes cover blue–yellow, purple–green, coral-blue-green, yellow-green-violet-blue and rose-teal. The former cyan–red axis remains available only for reading legacy records. Distances include the configured `0.0035` minimum, `0.075` maximum, and eight intermediate values. Each successful case was generated twice and compared as a deterministic seeded plate.
+The matrix contains 6 active measurement axes × 100 target numbers (0–99) × 10 evenly spaced requested distances × 3 deterministic seed families = **18,000 cases**. The red–green axis deterministically alternates its two polarities; the other active axes cover blue–yellow, purple–green, red-orange-blue-green, yellow-green-blue-violet and red-violet-blue-green. The former cyan–red axis remains available only for reading legacy records. Distances include the configured `0.0035` minimum, `0.075` maximum, and eight intermediate values. Each successful case was generated twice and compared as a deterministic seeded plate.
 
 | Check | Result |
 | --- | ---: |
@@ -71,7 +71,7 @@ Directional estimate counts were 980, 962 and 989 in the three groups. Fit/fallb
 
 ## What was not changed
 
-This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/maximum distances, color space, palette validation, and dCDT/CA/CI/RQI formulas. The default core session measures red–green as one bipolar axis and blue–yellow; purple–green, coral–blue-green, yellow-green-violet-blue and rose-teal are available as explicitly selected supplemental directions. The former cyan–red axis is retained only for legacy record readability. Each selected axis runs for 10–14 adaptive trials with a five-reversal stopping target and paired anchors. Core and supplemental records retain their mode and direction list; supplemental results do not enter the core dCDT trend. The engine version is bumped so earlier results remain readable but are not compared with this scope revision.
+This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/maximum distances, color space, palette validation, and dCDT/CA/CI/RQI formulas. The default core session measures red–green as one bipolar axis and blue–yellow; purple–green, red-orange-blue-green, yellow-green-blue-violet and red-violet-blue-green are available as explicitly selected supplemental directions. The former cyan–red axis is retained only for legacy record readability. Each selected axis runs for 10–14 adaptive trials with a five-reversal stopping target and paired anchors. Core and supplemental records retain their mode and direction list; supplemental results do not enter the core dCDT trend. The engine version is bumped so earlier results remain readable but are not compared with this scope revision.
 
 ## Limitations
 
@@ -80,5 +80,5 @@ This revision keeps the staircase mathematics, 75% criterion, adaptive minimum/m
 - No clinical validation, population norm, percentile, diagnosis, or normal/abnormal range is established.
 - Virtual observers cover one response model and do not establish real-user accuracy, lapse/guess behavior, device equivalence, confidence intervals, or empirical repeatability.
 - The current 14-trial stopping rule produces a high low-convergence rate and more reversal fallbacks in this simulation. That is reported honestly; low convergence is not silently promoted to a convergence claim, and the existing audit gates were not weakened to hide it.
-- The red–green axis alternates its two polarities; blue–yellow is part of the core, while purple–green, coral–blue-green, yellow-green-violet-blue and rose-teal are display-relative supplemental directions rather than clinical confusion axes. Cyan–red is a legacy-only direction in the current engine.
+- The red–green axis alternates its two polarities; blue–yellow is part of the core, while purple–green, red-orange-blue-green, yellow-green-blue-violet and red-violet-blue-green are display-relative supplemental directions rather than clinical confusion axes. Cyan–red is a legacy-only direction in the current engine.
 - The audit is a software regression check, not evidence that the measurement is clinically valid.

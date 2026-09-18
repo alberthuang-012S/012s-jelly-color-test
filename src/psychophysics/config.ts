@@ -13,10 +13,10 @@ export const DIRECTION_LABELS: Record<ColorDirectionId, string> = {
   C: '藍－黃方向',
   D: '紫－綠方向',
   E: '青－紅方向（舊版）',
-  F: '珊瑚－青藍方向',
-  G: '黃綠－紫藍方向',
-  H: '玫瑰－青綠方向',
-  RG: '紅－綠雙向軸',
+  F: '紅橙－青藍方向',
+  G: '黃綠－藍紫方向',
+  H: '紅紫－青綠方向',
+  RG: '紅－綠方向',
 }
 
 export const adaptiveConfig = {

@@ -64,7 +64,7 @@ function HeroDotVisual() {
 }
 
 const previewDirections = [
-  { label: '紅－綠雙向軸', value: '0.0184', width: '72%' },
+  { label: '紅－綠方向', value: '0.0184', width: '72%' },
   { label: '藍－黃方向', value: '0.0168', width: '61%' },
 ]
 
