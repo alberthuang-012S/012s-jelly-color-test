@@ -3,3 +3,6 @@ dist/
 .DS_Store
 *.local
 coverage/
+
+# Local visual reference assets; keep them out of the release source tree.
+docs/homepage-visual-concepts/
