@@ -9,7 +9,7 @@ interface DotPoint {
   top: string
   size: string
   delay: string
-  tone: 'soft' | 'warm' | 'accent'
+  tone: 'soft' | 'warm' | 'accent' | 'green' | 'lime' | 'yellow'
 }
 
 const ambientDots: DotPoint[] = Array.from({ length: 156 }, (_, index) => {
@@ -24,36 +24,65 @@ const ambientDots: DotPoint[] = Array.from({ length: 156 }, (_, index) => {
   }
 })
 
-const sampleFields = [
-  { label: '0', tone: 'violet', code: '01' },
-  { label: '1', tone: 'periwinkle', code: '02' },
-  { label: '2', tone: 'coral', code: '03' },
-  { label: 'S', tone: 'lilac', code: '04' },
-] as const
+const plateDots: DotPoint[] = Array.from({ length: 441 }, (_, index) => {
+  const column = index % 21
+  const row = Math.floor(index / 21)
+  const left = 8 + column * 4.2 + ((index * 17) % 9) / 10 - 0.45
+  const top = 8 + row * 4.2 + ((index * 29) % 9) / 10 - 0.45
+  const distance = Math.hypot(left - 50, top - 50)
+  if (distance > 44) return null
+  return {
+    left: `${left}%`,
+    top: `${top}%`,
+    size: `${4.5 + ((index * 13) % 5)}px`,
+    delay: `${(index % 13) * -0.45}s`,
+    tone: index % 11 === 0 ? 'yellow' : index % 4 === 0 ? 'lime' : 'green',
+  }
+}).filter((dot): dot is DotPoint => dot !== null)
+
+const hiddenBrandPatterns = [
+  ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+  ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+  ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+]
+
+const digitOffsets = [
+  { left: -0.4, top: 0.1 },
+  { left: 1.1, top: 1.4 },
+  { left: 2.5, top: -0.3 },
+]
+
+const hiddenBrandDots = hiddenBrandPatterns.flatMap((rows, digitIndex) => rows.flatMap((row, rowIndex) => [...row].flatMap((cell, columnIndex) => {
+  if (cell !== '1') return []
+  return digitOffsets.map((offset, offsetIndex) => ({
+    left: `${19 + digitIndex * 17.3 + columnIndex * 2.85 + offset.left}%`,
+    top: `${29 + rowIndex * 5.7 + offset.top}%`,
+    size: `${4.4 + ((digitIndex + rowIndex + columnIndex + offsetIndex) % 4)}px`,
+    delay: `${((digitIndex * 4 + rowIndex + offsetIndex) % 10) * -0.55}s`,
+  }))
+})))
 
 function HeroDotVisual() {
   return (
     <div className="start-visual" aria-hidden="true">
       <div className="start-visual-card">
-        <div className="start-dot-field">
+        <div className="start-dot-field start-dot-plate">
           <span className="start-visual-glow" />
           <span className="start-visual-ring start-visual-ring-outer" />
           <span className="start-visual-ring start-visual-ring-inner" />
-          <span className="start-visual-field-caption">COLOR FIELD <strong>01</strong></span>
-          <span className="start-visual-field-code">u′v′ / 2050 × 012S</span>
           <span className="start-visual-axis start-visual-axis-horizontal" />
           <span className="start-visual-axis start-visual-axis-vertical" />
-          {ambientDots.map((dot, index) => <span
+          {plateDots.map((dot, index) => <span
             className={`start-dot start-dot-${dot.tone}`}
-            key={`ambient-${index}`}
+            key={`plate-${index}`}
             style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
           />)}
-          <div className="start-visual-samples">
-            {sampleFields.map((sample) => <div className={`start-visual-sample start-visual-sample-${sample.tone}`} key={sample.label}>
-              <span className="start-sample-field"><span className="start-sample-glyph">{sample.label}</span></span>
-              <span className="start-sample-code">FIELD {sample.code}</span>
-            </div>)}
-          </div>
+          {hiddenBrandDots.map((dot, index) => <span
+            className="start-dot start-dot-digit"
+            key={`digit-${index}`}
+            style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
+          />)}
           <span className="start-visual-focus" />
         </div>
       </div>
@@ -75,14 +104,14 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
 
       <section className="start-hero" aria-labelledby="start-title">
         <div className="start-hero-copy">
-          <p className="start-kicker">01 / 色彩辨識挑戰</p>
-          <h1 id="start-title"><span>看見</span><span>顏色之間</span><span>微小的差異。</span></h1>
-          <p className="start-lede">從彩色圓點中找出隱藏的數字。<br />測驗會根據你的回答，<br className="start-lede-small-break" />逐步調整色彩差異。</p>
-          <p className="start-note"><span className="start-note-mark" aria-hidden="true" />核心快速版約 28–40 題；完成後可選擇補充方向。</p>
+          <p className="start-kicker">SAME DOTS, DIFFERENT WORLDS.</p>
+          <h1 id="start-title"><span>看見顏色之間</span><span>的<strong>微小差異</strong></span></h1>
+          <p className="start-lede">從彩色圓點中找出隱藏的數字。<br />測驗會依你的回答，<br className="start-lede-small-break" />逐步調整色彩差異。</p>
         </div>
         <HeroDotVisual />
         <div className="start-hero-actions">
           <button className="button start-primary-cta" type="button" onClick={onStart}>開始測驗 <span aria-hidden="true">→</span></button>
+          <p className="start-note"><span className="start-note-mark" aria-hidden="true" />核心快速版約 28–40 題・3–5 分鐘・動態調整難度</p>
         </div>
       </section>
     </main>
