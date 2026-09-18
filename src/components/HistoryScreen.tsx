@@ -28,8 +28,8 @@ export function HistoryScreen({ sessions, onBack, onStart, onOpenSession }: Hist
   const comparableIds = new Set(trend.sessions.map((session) => session.id))
   return (
     <main className="page-shell narrow-page history-page">
-      <div className="topbar"><button className="back-button" onClick={onBack}>← 返回</button><div className="brand-lockup"><span className="brand-dot" /> JELLY COLOR TEST</div><span className="eyebrow">LOCAL HISTORY</span></div>
-      <section className="history-header"><span className="section-kicker">YOUR SESSIONS</span><h1>看見自己的測量變化，也看見條件的差異。</h1><p>所有完成或中途離開的紀錄都會保留；只有測量引擎、裝置與顯示條件相容的高品質結果，才會連成趨勢。</p><button className="button button-primary" onClick={onStart}>再挑戰一次 <span>→</span></button></section>
+      <div className="topbar"><button className="back-button" onClick={onBack}>← 返回</button><div className="brand-lockup brand-text-lockup" aria-label="2050 × 012S 色彩辨識測驗"><strong>2050 × 012S</strong><span>色彩辨識測驗</span></div><span className="eyebrow">LOCAL HISTORY</span></div>
+      <section className="history-header"><span className="section-kicker">YOUR SESSIONS</span><h1>看見自己的測量變化，也看見條件的差異。</h1><p>完成的測驗會保存在此裝置；只有測量引擎、裝置與顯示條件相容的高品質結果，才會連成趨勢。</p><button className="button button-primary" onClick={onStart}>再挑戰一次 <span>→</span></button></section>
       {sessions.length === 0 ? <div className="empty-state"><span>○</span><strong>還沒有歷史紀錄</strong><p>完成第一次挑戰後，這裡會顯示 dCDT、CA、CI 與 RQI。</p></div> : <>
         <section className="history-trend-section" aria-labelledby="history-trend-title">
           <div className="history-section-heading"><div><span className="section-kicker">01 / dCDT TREND</span><h2 id="history-trend-title">相容條件下的變化</h2></div></div>

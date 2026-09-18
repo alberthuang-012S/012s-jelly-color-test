@@ -24,7 +24,9 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .narrow-page { max-width: 960px; }
 .topbar, .test-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .brand-lockup { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .16em; font-weight: 800; }
-.brand-dot { width: 13px; height: 13px; display: inline-block; border-radius: 50% 48% 52% 46%; background: var(--coral); box-shadow: 4px 0 0 var(--acid); }
+.brand-text-lockup { gap: 12px; letter-spacing: .04em; }
+.brand-text-lockup strong { color: var(--ink); font-size: 15px; letter-spacing: .04em; }
+.brand-text-lockup span { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .08em; }
 .eyebrow, .section-kicker, .section-index { font-size: 10px; letter-spacing: .18em; font-weight: 800; color: var(--muted); }
 .accent { color: #d55747; }
 .button { border: 0; border-radius: 99px; padding: 14px 20px; cursor: pointer; font-weight: 750; font-size: 13px; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
@@ -79,7 +81,6 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .plate-frame { padding: 10px; background: var(--card); border: 1px solid var(--line); box-shadow: 10px 10px 0 rgba(108,152,255,.13); }
 .plate-canvas { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; }
 .answer-area { max-width: 620px; margin: 34px auto 0; text-align: center; }
-.answer-label { margin-bottom: 14px; font-size: 11px; letter-spacing: .14em; font-weight: 800; color: var(--muted); }
 .answer-entry { max-width: 360px; margin: 0 auto; }
 .answer-input { width: 100%; min-height: 56px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); font: inherit; font-size: 28px; text-align: center; font-variant-numeric: tabular-nums; }
 .answer-input::placeholder { color: var(--muted); font-size: 14px; }
@@ -344,7 +345,6 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .test-instruction p { margin: 0; }
 .test-page .plate-frame { width: 100%; max-width: calc((100dvh - 190px) * 5 / 3); justify-self: center; padding: 6px; box-shadow: 4px 4px 0 rgba(108,152,255,.13); }
 .answer-area { width: 100%; max-width: none; margin: 0; }
-.answer-label { margin: 0 0 8px; letter-spacing: .04em; }
 .answer-entry { width: 100%; max-width: none; }
 .answer-display-row { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 8px; margin-bottom: 8px; }
 .answer-input { min-width: 0; min-height: 44px; height: 44px; margin: 0; font-size: 24px; }
@@ -378,15 +378,10 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
   *, *:before, *:after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
 
-.answer-help { margin: -2px 0 9px; color: var(--muted); font-size: 11px; line-height: 1.5; }
-
 @media (max-width: 760px) {
   .test-topbar { gap: 8px; }
   .test-topbar .brand-lockup { font-size: 10px; letter-spacing: .1em; gap: 6px; }
-  .test-topbar .brand-dot { width: 10px; height: 10px; }
   .test-progress-label strong { font-size: 9px; }
-  .test-progress-secondary { font-size: 8px; }
-  .answer-help { font-size: 10px; }
 }
 
 /* Phase 2A history and report reading states. */
@@ -438,7 +433,6 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 body { background: var(--paper); }
 .button-primary { background: var(--blue); box-shadow: 0 10px 22px rgba(118, 102, 214, .18); }
 .button-primary span { color: #fff; }
-.brand-dot { background: var(--coral); box-shadow: 4px 0 0 var(--acid); }
 
 /* Homepage: premium 012S colour-vision landing screen. */
 .start-page {
@@ -601,7 +595,6 @@ body { background: var(--paper); }
 .test-session-info .test-stage { color: var(--muted); }
 .test-session-info .test-progress-label { text-align: left; }
 .test-session-info .test-progress-label strong { color: var(--ink); }
-.test-progress-secondary { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
 .stage-dot { background: var(--coral); }
 .progress-track { height: 4px; border-radius: 999px; background: rgba(118, 102, 214, .11); overflow: hidden; }
 .progress-track span { background: var(--blue); border-radius: inherit; }
@@ -611,23 +604,12 @@ body { background: var(--paper); }
 .instruction-number { color: var(--blue); }
 .test-instruction h1 { margin: 0 0 6px; color: var(--ink); font-size: clamp(25px, 3vw, 36px); line-height: 1.2; letter-spacing: -.055em; }
 .test-instruction p { margin: 0; color: var(--muted); font-size: 13px; }
-.test-question-count { min-width: 115px; padding: 10px 14px; border-left: 1px solid var(--line); text-align: right; }
-.test-question-count small, .test-question-count em { display: block; color: var(--muted); font-size: 10px; font-style: normal; }
-.test-question-count strong { display: block; margin: 5px 0 2px; color: var(--ink); font-size: 21px; font-variant-numeric: tabular-nums; letter-spacing: -.05em; }
-.test-question-count strong span { color: var(--lavender); font-size: 15px; }
 .plate-column { min-width: 0; display: flex; flex-direction: column; align-items: center; }
 .test-page .plate-frame { width: 100%; max-width: 900px; padding: 14px; border: 1px solid var(--line); border-radius: 26px; background: #fff; box-shadow: 0 18px 42px rgba(76, 66, 125, .1); }
 .test-page .plate-canvas { border-radius: 16px; }
 .plate-caption { margin: 12px 0 0; color: var(--muted); font-size: 10px; letter-spacing: .08em; }
-.plate-caption span { margin: 0 5px; color: var(--lavender); }
 .answer-area { align-self: stretch; max-width: none; margin: 0; padding: 26px 24px 22px; border: 1px solid var(--line); border-radius: 24px; background: #fff; box-shadow: 0 18px 42px rgba(76, 66, 125, .07); text-align: left; }
-.answer-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--soft-line); }
-.answer-panel-heading > div > span, .answer-panel-heading > div > strong { display: block; }
-.answer-panel-kicker { color: var(--blue); font-size: 10px; font-weight: 850; letter-spacing: .16em; }
-.answer-panel-heading > div > strong { margin-top: 8px; color: var(--ink); font-size: 19px; letter-spacing: -.035em; }
-.answer-panel-index { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.answer-area .answer-label { margin: 18px 0 7px; color: var(--muted); font-size: 12px; letter-spacing: .02em; font-weight: 700; }
-.answer-help { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.answer-title { margin: 0 0 18px; padding-bottom: 18px; border-bottom: 1px solid var(--soft-line); color: var(--ink); font-size: 19px; letter-spacing: -.035em; }
 .answer-entry { max-width: none; margin: 0; }
 .answer-display-row { grid-template-columns: minmax(0, 1fr) 52px; gap: 8px; margin-bottom: 10px; }
 .answer-input { min-height: 62px; height: 62px; border: 1px solid rgba(118, 102, 214, .26); border-radius: 14px; background: #fbfaff; color: var(--ink); font-size: 33px; font-weight: 800; }
@@ -730,28 +712,23 @@ body { background: var(--paper); }
   .test-lab-page { width: calc(100% - 24px); }
   .test-lab-topbar { display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 11px 12px; min-height: 0; padding: 14px 0; }
   .test-lab-topbar .brand-lockup { grid-column: 1; grid-row: 1; font-size: 10px; letter-spacing: .1em; gap: 7px; }
-  .test-lab-topbar .brand-dot { width: 10px; height: 10px; }
+  .test-lab-topbar .brand-text-lockup { gap: 6px; letter-spacing: .03em; }
+  .test-lab-topbar .brand-text-lockup strong { font-size: 14px; }
+  .test-lab-topbar .brand-text-lockup span { font-size: 9px; }
   .test-session-info { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; gap: 12px; margin-left: 0; }
   .test-session-info .test-stage { display: block; font-size: 9px; letter-spacing: .1em; }
   .test-session-info .test-progress-label { font-size: 9px; text-align: right; }
   .test-session-info .test-progress-label strong { font-size: 9px; }
-  .test-progress-secondary { font-size: 9px; }
   .test-content { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 12px 0 32px; }
   .test-instruction { align-items: flex-end; gap: 12px; padding-bottom: 9px; }
   .test-instruction-copy { gap: 10px; }
   .test-instruction h1 { font-size: 22px; }
   .test-instruction p { font-size: 11px; }
-  .test-question-count { min-width: 86px; padding: 7px 0 7px 10px; }
-  .test-question-count strong { font-size: 17px; }
-  .test-question-count small, .test-question-count em { font-size: 9px; }
   .test-page .plate-frame { max-width: none; padding: 7px; border-radius: 21px; box-shadow: 0 14px 30px rgba(76, 66, 125, .08); }
   .test-page .plate-canvas { border-radius: 13px; }
   .plate-caption { margin-top: 6px; font-size: 9px; }
   .answer-area { padding: 16px 15px 14px; border-radius: 20px; }
-  .answer-panel-heading { padding-bottom: 10px; }
-  .answer-panel-heading > div > strong { font-size: 17px; }
-  .answer-area .answer-label { margin-top: 11px; font-size: 11px; }
-  .answer-help { margin-bottom: 8px; font-size: 10px; }
+  .answer-title { margin-bottom: 10px; padding-bottom: 10px; font-size: 17px; }
   .answer-input, .answer-display-row .answer-delete { min-height: 52px; height: 52px; }
   .answer-input { font-size: 29px; }
   .number-pad { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
@@ -761,7 +738,9 @@ body { background: var(--paper); }
   .premium-report { width: min(calc(100% - 32px), 680px); }
   .premium-report .results-topbar { min-height: 70px; }
   .premium-report .results-topbar .brand-lockup { font-size: 10px; letter-spacing: .1em; gap: 7px; }
-  .premium-report .results-topbar .brand-dot { width: 10px; height: 10px; }
+  .premium-report .results-topbar .brand-text-lockup { gap: 6px; letter-spacing: .03em; }
+  .premium-report .results-topbar .brand-text-lockup strong { font-size: 14px; }
+  .premium-report .results-topbar .brand-text-lockup span { font-size: 9px; }
   .premium-report .results-topbar .back-button { padding: 8px 11px; font-size: 10px; }
   .report-hero { grid-template-columns: 1fr; gap: 25px; padding: 34px 0 20px; }
   .report-hero-overline { margin-top: 25px; font-size: 9px; }
@@ -798,8 +777,6 @@ body { background: var(--paper); }
 }
 
 @media (max-width: 360px) {
-  .test-question-count { min-width: 76px; }
-  .test-question-count strong { font-size: 15px; }
   .number-pad { gap: 6px; }
   .answer-button { min-height: 44px; }
 }

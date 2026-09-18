@@ -55,7 +55,7 @@ export function ResultsScreen({ session, previousSession, isHistorical = false, 
   return (
     <main className="page-shell results-page readable-report premium-report">
       <div className="topbar results-topbar">
-        <div className="brand-lockup"><span className="brand-dot" /> JELLY COLOR TEST</div>
+        <div className="brand-lockup brand-text-lockup" aria-label="2050 × 012S 色彩辨識測驗"><strong>2050 × 012S</strong><span>色彩辨識測驗</span></div>
         <button className="back-button" type="button" onClick={onHistory}>歷史紀錄 →</button>
       </div>
       <section className="report-hero" aria-labelledby="result-title">
