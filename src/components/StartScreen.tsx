@@ -12,13 +12,17 @@ interface DotPoint {
   tone: 'soft' | 'warm' | 'accent'
 }
 
-const ambientDots: DotPoint[] = Array.from({ length: 118 }, (_, index) => ({
-  left: `${6 + ((index * 47) % 88)}%`,
-  top: `${7 + ((index * 61) % 86)}%`,
-  size: `${3 + ((index * 13) % 10)}px`,
-  delay: `${(index % 9) * -0.7}s`,
-  tone: index % 23 === 0 ? 'accent' : index % 4 === 0 ? 'warm' : 'soft',
-}))
+const ambientDots: DotPoint[] = Array.from({ length: 156 }, (_, index) => {
+  const angle = index * 2.399963229728653
+  const radius = 5 + Math.sqrt((index * 47) % 100) * .43
+  return {
+    left: `${50 + Math.cos(angle) * radius}%`,
+    top: `${50 + Math.sin(angle) * radius}%`,
+    size: `${2 + ((index * 13) % 8)}px`,
+    delay: `${(index % 11) * -.55}s`,
+    tone: index % 29 === 0 ? 'accent' : index % 5 === 0 ? 'warm' : 'soft',
+  }
+})
 
 const hiddenDigitPatterns = [
   ['11110', '10001', '10000', '11110', '00001', '00001', '10001', '01110'],
@@ -44,29 +48,32 @@ const hiddenDigitDots = hiddenDigitPatterns.flatMap((rows, digitIndex) => rows.f
 function HeroDotVisual() {
   return (
     <div className="start-visual" aria-hidden="true">
-      <div className="start-dot-field">
-        <span className="start-visual-axis start-visual-axis-horizontal" />
-        <span className="start-visual-axis start-visual-axis-vertical" />
-        {ambientDots.map((dot, index) => <span
-          className={`start-dot start-dot-${dot.tone}`}
-          key={`ambient-${index}`}
-          style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
-        />)}
-        {hiddenDigitDots.map((dot, index) => <span
-          className="start-dot start-dot-digit"
-          key={`digit-${index}`}
-          style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
-        />)}
+      <div className="start-visual-card">
+        <div className="start-dot-field">
+          <span className="start-visual-glow" />
+          <span className="start-visual-ring start-visual-ring-outer" />
+          <span className="start-visual-ring start-visual-ring-inner" />
+          <span className="start-visual-field-caption">COLOR FIELD <strong>01</strong></span>
+          <span className="start-visual-field-code">u′v′ / 2050 × 012S</span>
+          <span className="start-visual-axis start-visual-axis-horizontal" />
+          <span className="start-visual-axis start-visual-axis-vertical" />
+          {ambientDots.map((dot, index) => <span
+            className={`start-dot start-dot-${dot.tone}`}
+            key={`ambient-${index}`}
+            style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
+          />)}
+          {hiddenDigitDots.map((dot, index) => <span
+            className="start-dot start-dot-digit"
+            key={`digit-${index}`}
+            style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, animationDelay: dot.delay }}
+          />)}
+          <span className="start-visual-focus" />
+        </div>
       </div>
       <div className="start-visual-meta"><span>隱藏數字／圖形示意</span><span>色彩視覺實驗</span></div>
     </div>
   )
 }
-
-const previewDirections = [
-  { label: '紅－綠方向', value: '0.0184', width: '72%' },
-  { label: '藍－黃方向', value: '0.0168', width: '61%' },
-]
 
 export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenProps) {
   return (
@@ -90,61 +97,6 @@ export function StartScreen({ onStart, onHistory, sessionCount }: StartScreenPro
         <div className="start-hero-actions">
           <button className="button start-primary-cta" type="button" onClick={onStart}>開始測驗 <span aria-hidden="true">→</span></button>
         </div>
-      </section>
-
-      <section className="start-hero-strip" aria-label="測驗特點">
-        <div><span className="start-strip-index">01</span><strong>依回答調整難度</strong></div>
-        <div><span className="start-strip-index">02</span><strong>建立辨識輪廓</strong></div>
-        <div><span className="start-strip-index">03</span><strong>非醫療診斷</strong></div>
-      </section>
-
-      <section className="start-section start-method" aria-labelledby="start-method-title">
-        <div className="start-section-heading">
-          <p className="start-kicker">02 / 測驗方式</p>
-          <h2 id="start-method-title">三個步驟，完成<br />一次辨識。</h2>
-        </div>
-        <div className="start-method-grid">
-          <article className="start-method-item"><span>01</span><h3>找出數字</h3><p>從彩色圓點中，辨認你看到的隱藏數字。</p></article>
-          <article className="start-method-item"><span>02</span><h3>自動調整</h3><p>測驗會根據每次回答，逐步調整色彩差異。</p></article>
-          <article className="start-method-item"><span>03</span><h3>查看結果</h3><p>完成後查看本次色彩辨識門檻與方向差異。</p></article>
-        </div>
-      </section>
-
-      <section className="start-section start-preview" aria-labelledby="start-preview-title">
-        <div className="start-section-heading">
-          <p className="start-kicker">03 / 結果預覽</p>
-          <h2 id="start-preview-title">先完成核心測量，<br />再選擇想看的方向。</h2>
-        </div>
-        <div className="start-preview-grid">
-          <div className="start-preview-metric"><strong>0.0184</strong><span>色差辨識門檻</span><small>示意資料</small></div>
-          <div className="start-preview-directions">
-            {previewDirections.map((direction) => <div className="start-preview-direction" key={direction.label}>
-              <div className="start-preview-direction-label"><span>{direction.label}</span><small>示意資料</small></div>
-              <div className="start-preview-bar" aria-hidden="true"><span style={{ width: direction.width }} /></div>
-              <strong>{direction.value}</strong>
-            </div>)}
-          </div>
-        </div>
-        <p className="start-preview-note">核心快速版聚焦紅綠與藍黃；完成後可在結果頁從多種色彩組合中選擇補充測驗。</p>
-      </section>
-
-      <section className="start-section start-statement" aria-labelledby="start-statement-title">
-        <div className="start-statement-mark" aria-hidden="true" />
-        <div className="start-statement-copy">
-          <p className="start-kicker">04 / 品牌宣言</p>
-          <h2 id="start-statement-title">差異很小，<br />但你可能看得<br className="start-statement-mobile-break" />出來。</h2>
-          <p>有些色彩差異一眼就能發現。<br />有些，需要再仔細一點。</p>
-        </div>
-      </section>
-
-      <section className="start-final-cta" aria-labelledby="start-final-title">
-        <div className="start-final-copy">
-          <p className="start-final-kicker">05 / 開始</p>
-          <h2 id="start-final-title">準備好了嗎？</h2>
-          <p>看看你能辨認<br />多細微的色彩差異。</p>
-          <button className="button start-final-button" type="button" onClick={onStart}>開始測驗 <span aria-hidden="true">→</span></button>
-        </div>
-        <span className="start-footer-code">2050 × 012S</span>
       </section>
     </main>
   )
