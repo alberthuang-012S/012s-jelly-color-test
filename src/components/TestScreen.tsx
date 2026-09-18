@@ -2,16 +2,12 @@ import { useEffect, useState } from 'react'
 import { progressPercent, questionCountEstimate } from '../test/scheduler'
 import { PlateCanvas } from './PlateCanvas'
 import { NumberPad } from './NumberPad'
-import { canSubmitTrial } from '../test/trialClock'
 import type { GeneratedPlate, TestEngineState, TrialSpec } from '../test/types'
 
 interface TestScreenProps {
   engine: TestEngineState
   spec: TrialSpec
   plate: GeneratedPlate
-  paused: boolean
-  onPause: () => void
-  onResume: () => void
   onAnswer: (answer: number | null) => void
 }
 
@@ -29,7 +25,7 @@ const progressLabels: Record<TrialSpec['phase'], string> = {
   anchor: '穩定性確認中',
 }
 
-export function TestScreen({ engine, spec, plate, paused, onPause, onResume, onAnswer }: TestScreenProps) {
+export function TestScreen({ engine, spec, plate, onAnswer }: TestScreenProps) {
   const [locked, setLocked] = useState(false)
   const progress = progressPercent(engine)
   const count = questionCountEstimate(engine)
@@ -37,7 +33,7 @@ export function TestScreen({ engine, spec, plate, paused, onPause, onResume, onA
   const totalQuestions = count.exact ? `${count.maximumTotal}` : `${count.minimumTotal}–${count.maximumTotal}`
   useEffect(() => setLocked(false), [spec.id])
   const answer = (value: number | null) => {
-    if (!canSubmitTrial(paused, locked)) return
+    if (locked) return
     setLocked(true)
     onAnswer(value)
   }
@@ -49,7 +45,6 @@ export function TestScreen({ engine, spec, plate, paused, onPause, onResume, onA
           <div className="test-stage"><span className="stage-dot" /> {engine.mode === 'supplemental' ? '補充方向 · ' : '快速專業版 · '}{phaseLabels[spec.phase]}</div>
           <div className="test-progress-label" aria-live="polite"><strong>{progressLabels[spec.phase]} · {progress}%</strong><span className="test-progress-secondary">第 {currentQuestion} 題 · 共 {totalQuestions} 題</span></div>
         </div>
-        <button className="pause-button" type="button" onClick={paused ? onResume : onPause}>{paused ? '繼續測驗' : '暫停一下'}</button>
       </header>
       <div className="progress-track" aria-label={`測驗進度 ${progress}%`}><span style={{ width: `${Math.max(4, progress)}%` }} /></div>
       <section className="test-content">
@@ -58,14 +53,14 @@ export function TestScreen({ engine, spec, plate, paused, onPause, onResume, onA
           <div className="test-question-count" aria-live="polite"><small>作答進度</small><strong>{count.answered} <span>/</span> {totalQuestions}</strong><em>{count.exact ? '題' : '預估題數'}</em></div>
         </div>
         <div className="plate-column">
-          <div className="plate-frame">{paused ? <div className="pause-panel" role="status"><span className="pause-icon">◌</span><strong>休息一下眼睛</strong><p>準備好後再繼續。這一題會保留不變。</p><button className="button button-primary" type="button" onClick={onResume}>繼續測驗 <span>→</span></button></div> : <PlateCanvas plate={plate} />}</div>
+          <div className="plate-frame"><PlateCanvas plate={plate} /></div>
           <p className="plate-caption">色彩圓點題板 <span aria-hidden="true">·</span> 依目前畫面條件觀察</p>
         </div>
         <div className="answer-area">
           <div className="answer-panel-heading"><div><span className="answer-panel-kicker">ANSWER</span><strong>輸入你看到的數字</strong></div><span className="answer-panel-index">#{currentQuestion}</span></div>
           <p className="answer-label">輸入答案，再按確認送出</p>
           <p className="answer-help">看不清楚時，直接按「看不出來」。</p>
-          <NumberPad key={spec.id} onAnswer={answer} disabled={locked || paused} />
+          <NumberPad key={spec.id} onAnswer={answer} disabled={locked} />
           <p className="no-feedback-note">可用鍵盤輸入數字 · Enter 送出</p>
         </div>
       </section>

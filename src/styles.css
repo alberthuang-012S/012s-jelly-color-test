@@ -378,22 +378,12 @@ button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
   *, *:before, *:after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
 
-.pause-button { order: 4; padding: 8px 13px; border: 1px solid var(--line); border-radius: 99px; background: var(--card); color: var(--ink); cursor: pointer; font-size: 11px; font-weight: 750; transition: background .18s, color .18s, transform .18s; }
-.pause-button:hover { background: var(--ink); color: #fff; transform: translateY(-1px); }
-.pause-panel { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; background: var(--ink); color: #fff; }
-.pause-icon { display: block; margin-bottom: 10px; color: var(--acid); font-size: 42px; line-height: 1; }
-.pause-panel strong { font-size: 20px; }
-.pause-panel p { margin: 8px 0 18px; color: rgba(255,255,255,.7); font-size: 12px; }
-.pause-panel .button { font-size: 12px; }
-.pause-panel .button-primary { background: var(--acid); color: var(--ink); }
-.pause-panel .button-primary span { color: var(--ink); }
 .answer-help { margin: -2px 0 9px; color: var(--muted); font-size: 11px; line-height: 1.5; }
 
 @media (max-width: 760px) {
   .test-topbar { gap: 8px; }
   .test-topbar .brand-lockup { font-size: 10px; letter-spacing: .1em; gap: 6px; }
   .test-topbar .brand-dot { width: 10px; height: 10px; }
-  .pause-button { padding: 7px 9px; font-size: 9px; }
   .test-progress-label strong { font-size: 9px; }
   .test-progress-secondary { font-size: 8px; }
   .answer-help { font-size: 10px; }
@@ -653,14 +643,6 @@ body { background: var(--paper); }
 .answer-unknown { margin-top: 0; color: var(--muted); font-size: 12px; }
 .answer-unknown span { color: var(--blue); }
 .answer-area .no-feedback-note { margin: 12px 0 0; color: var(--muted); font-size: 10px; text-align: center; }
-.pause-panel { min-height: 300px; border-radius: 16px; background: #efebff; color: var(--ink); }
-.pause-icon { color: var(--blue); }
-.pause-panel p { color: var(--muted); }
-.pause-panel .button-primary { background: var(--blue); color: #fff; }
-.pause-panel .button-primary span { color: #fff; }
-.pause-button { border-color: var(--line); background: #fff; color: var(--ink); }
-.pause-button:hover { background: var(--blue); color: #fff; }
-
 /* Results screen: a calm, legible personal report with dCDT as the anchor. */
 .premium-report { max-width: 1240px; padding-bottom: 62px; }
 .premium-report .results-topbar { min-height: 76px; border-bottom-color: var(--line); }
@@ -746,7 +728,7 @@ body { background: var(--paper); }
 @media (max-width: 760px) {
   .page-shell { width: min(calc(100% - 32px), 680px); }
   .test-lab-page { width: calc(100% - 24px); }
-  .test-lab-topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; gap: 11px 12px; min-height: 0; padding: 14px 0; }
+  .test-lab-topbar { display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 11px 12px; min-height: 0; padding: 14px 0; }
   .test-lab-topbar .brand-lockup { grid-column: 1; grid-row: 1; font-size: 10px; letter-spacing: .1em; gap: 7px; }
   .test-lab-topbar .brand-dot { width: 10px; height: 10px; }
   .test-session-info { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; gap: 12px; margin-left: 0; }
@@ -754,7 +736,6 @@ body { background: var(--paper); }
   .test-session-info .test-progress-label { font-size: 9px; text-align: right; }
   .test-session-info .test-progress-label strong { font-size: 9px; }
   .test-progress-secondary { font-size: 9px; }
-  .pause-button { grid-column: 2; grid-row: 1; padding: 7px 10px; font-size: 9px; }
   .test-content { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 12px 0 32px; }
   .test-instruction { align-items: flex-end; gap: 12px; padding-bottom: 9px; }
   .test-instruction-copy { gap: 10px; }
@@ -777,8 +758,6 @@ body { background: var(--paper); }
   .answer-button { min-height: 48px; border-radius: 12px; }
   .answer-actions .answer-button { min-height: 50px; border-radius: 12px; }
   .answer-area .no-feedback-note { display: none; }
-  .pause-panel { min-height: 235px; }
-
   .premium-report { width: min(calc(100% - 32px), 680px); }
   .premium-report .results-topbar { min-height: 70px; }
   .premium-report .results-topbar .brand-lockup { font-size: 10px; letter-spacing: .1em; gap: 7px; }

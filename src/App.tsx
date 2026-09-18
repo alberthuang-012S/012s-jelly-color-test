@@ -9,7 +9,7 @@ import { readHistory, saveSession } from './storage/history'
 import { latestComparablePrevious } from './test/history'
 import { buildTestSession, readDeviceInfo } from './test/session'
 import { createEngineState, recordTrial, selectNextTrial } from './test/scheduler'
-import { pauseTrial, responseTimeMs as trialResponseTimeMs, resumeTrial, startTrial, type TrialClock } from './test/trialClock'
+import { responseTimeMs as trialResponseTimeMs, startTrial, type TrialClock } from './test/trialClock'
 import type { ColorDirectionId, TestEngineState, TestSession } from './test/types'
 
 type Screen = 'start' | 'environment' | 'test' | 'results' | 'history'
@@ -21,7 +21,6 @@ function App() {
   const [history, setHistory] = useState<TestSession[]>(() => readHistory())
   const [viewedSession, setViewedSession] = useState<TestSession | null>(null)
   const [startedAt, setStartedAt] = useState<string>('')
-  const [paused, setPaused] = useState(false)
   const trialClock = useRef<TrialClock | null>(null)
   const activeTrialId = useRef<string | null>(null)
   const focusInterrupted = useRef(false)
@@ -52,12 +51,8 @@ function App() {
       activeTrialId.current = spec.id
       trialClock.current = startTrial(now)
       focusInterrupted.current = false
-    } else if (paused && !trialClock.current.paused) {
-      trialClock.current = pauseTrial(trialClock.current)
-    } else if (!paused && trialClock.current.paused) {
-      trialClock.current = resumeTrial(trialClock.current, now)
     }
-  }, [screen, spec?.id, paused])
+  }, [screen, spec?.id])
 
   useEffect(() => {
     if (screen !== 'test' || !spec) return undefined
@@ -71,7 +66,6 @@ function App() {
   const begin = () => {
     setStartedAt(new Date().toISOString())
     setViewedSession(null)
-    setPaused(false)
     setSession(null)
     setEngine(createEngineState(undefined, true, 'core'))
     setScreen('test')
@@ -82,7 +76,6 @@ function App() {
     if (!selected.length) return
     setStartedAt(new Date().toISOString())
     setViewedSession(null)
-    setPaused(false)
     const parentSessionId = session?.testMode === 'core' ? session.id : undefined
     setSession(null)
     setEngine(createEngineState(undefined, true, 'supplemental', selected, parentSessionId))
@@ -90,7 +83,7 @@ function App() {
   }
 
   const answer = (value: number | null) => {
-    if (paused || !engine || !spec || !plate) return
+    if (!engine || !spec || !plate) return
     const responseTime = trialClock.current ? trialResponseTimeMs(trialClock.current, performance.now()) : undefined
     if (responseTime === undefined) return
     const nextEngine = recordTrial(engine, spec, value, Math.max(1, Math.round(responseTime)), focusInterrupted.current, plate)
@@ -108,7 +101,6 @@ function App() {
     setSession(null)
     setViewedSession(null)
     setEngine(null)
-    setPaused(false)
     setScreen('environment')
   }
 
@@ -127,7 +119,7 @@ function App() {
 
   if (screen === 'environment') return <EnvironmentCheck onContinue={begin} onBack={() => setScreen('start')} />
   if (screen === 'test' && generated.error) return <main className="page-shell"><h1>題板未通過品質檢查</h1><p>已停止測量，本次未產生分數。請重新開始。</p><button className="button button-primary" onClick={restart}>重新開始</button></main>
-  if (screen === 'test' && engine && spec && plate) return <TestScreen engine={engine} spec={spec} plate={plate} paused={paused} onPause={() => setPaused(true)} onResume={() => setPaused(false)} onAnswer={answer} />
+  if (screen === 'test' && engine && spec && plate) return <TestScreen engine={engine} spec={spec} plate={plate} onAnswer={answer} />
   if (screen === 'results' && reportSession) return <ResultsScreen session={reportSession} previousSession={reportPrevious} isHistorical={Boolean(viewedSession)} onRestart={restart} onHistory={showHistory} onStartSupplemental={beginSupplemental} />
   if (screen === 'history') return <HistoryScreen sessions={history} onBack={() => setScreen(session ? 'results' : 'start')} onStart={restart} onOpenSession={openHistorySession} />
   return <StartScreen onStart={() => setScreen('environment')} onHistory={() => setScreen('history')} sessionCount={history.length} />
